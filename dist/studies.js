@@ -9,7 +9,7 @@
   const nav=document.createElement('nav');
   nav.className='main-nav';
   nav.setAttribute('aria-label','Navegação principal');
-  nav.innerHTML=[['dashboard','Meu dia'],['studies','Estudos'],['reviews','Revisões'],['applications','Candidaturas'],['history','Histórico']].map(([id,label])=>`<button data-study-view="${id}" ${id==='dashboard'?'aria-current="page"':''}>${label}</button>`).join('');
+  nav.innerHTML=[['dashboard','Meu dia'],['studies','Estudos'],['reviews','Revisões'],['applications','Candidaturas'],['clareza','Clareza'],['history','Histórico']].map(([id,label])=>`<button data-study-view="${id}" ${id==='dashboard'?'aria-current="page"':''}>${label}</button>`).join('');
   document.querySelector('header .tag').replaceWith(nav);
   const dashboard=document.createElement('section');
   dashboard.id='studyDashboard';
@@ -43,6 +43,7 @@
   } function go(target){
     view=target;
     window.Applications?.setVisible(target==='applications');
+    window.Clareza?.setVisible(target==='clareza');document.getElementById('clarezaPage')&&(document.getElementById('clarezaPage').hidden=target!=='clareza');
     document.body.classList.remove('focus-mode');
     $('focusMode').textContent='Expandir foco ↗';
     document.querySelector('main').hidden=target!=='dashboard';
@@ -622,7 +623,8 @@
         renderWeek();
         refreshAgendaOptions();
         renderMusic();
-        updateFocusContext()
+        updateFocusContext();
+        window.Clareza?.refresh();window.applySections?.();window.renderBackupNudge?.()
       },'Importar')
     }catch(err){
       toast(err.message||'Não foi possível ler o arquivo.')

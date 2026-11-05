@@ -115,7 +115,7 @@
     if(!payload||payload.format!=='stepbystep-backup'||payload.version!==1||!payload.data)throw Error('Arquivo de backup inválido.');
     const incoming=payload.data;
     if(incoming.applications!==undefined)root.ApplicationCore?.validate(incoming.applications);
-    validateStudy(incoming.study);
+    validateStudy(incoming.study);if(incoming.clareza!==undefined){if(!root.ClarezaCore)throw Error('Backup com dados de Clareza: recarregue a página.');root.ClarezaCore.validate(incoming.clareza)}
     if(!incoming.days||typeof incoming.days!=='object'||Array.isArray(incoming.days))throw Error('Histórico diário inválido.');
     for(const [d,v] of Object.entries(incoming.days)){
       if(!validDate(d)||!v||!Array.isArray(v.blocks)||!Array.isArray(v.checks)||!Array.isArray(v.distractions)||!Number.isFinite(v.timerMinutes)||v.timerMinutes<1||v.timerMinutes>180)throw Error('Dia inválido no backup.');
@@ -145,7 +145,7 @@
         ids.add(v.id)
       }
     }if(incoming.applications)merged.applications=root.ApplicationCore.merge(merged.applications||[],incoming.applications);
-    validateStudy(merged.study);
+    if(incoming.clareza&&root.ClarezaCore)merged.clareza=root.ClarezaCore.merge(merged.clareza,incoming.clareza);validateStudy(merged.study);
     return merged
   } root.StudyCore={
     uid,dateKey,validDate,addDays,intervals,empty,schedule,rate,esc,markdown,validateStudy,validateBackup,mergeBackup
