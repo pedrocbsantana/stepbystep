@@ -849,3 +849,5 @@ footer{justify-content:flex-end}
 #clzNext{font-size:var(--fs-sm)}
 .settings-dialog{max-height:90vh;overflow:auto}
 .nudge-danger{border-color:var(--danger-line);background:var(--danger-soft);color:var(--ink)}
+#syncKey{flex:1;min-width:0}
+#syncUnlinked{flex-wrap:nowrap}

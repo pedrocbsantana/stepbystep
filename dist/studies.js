@@ -573,6 +573,7 @@
     $('eventTopic').innerHTML=topicOptions($('eventSubject').value)
   };
   refreshAgendaOptions();
+  window.StudyUI={refresh(){S=db.study;renderDashboard();refreshAgendaOptions();if(!subject())subjectId=S.subjects[0]?.id||'';if(view==='studies')renderStudies();if(view==='reviews')renderReviews();if(view==='history')renderHistoryPage()}};
   window.StudyBridge={
     onStart,onPause,onFinish:()=>{
       onPause();

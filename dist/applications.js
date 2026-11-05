@@ -38,5 +38,5 @@
   $('applicationList').onchange=e=>{const id=e.target.dataset.appStatus;if(!id)return;const v=db.applications.find(v=>v.id===id),status=e.target.value;if(!v||v.status===status)return;const old={status:v.status,updatedAt:v.updatedAt,history:[...v.history]};v.status=status;v.updatedAt=new Date().toISOString();v.history.push({status,at:v.updatedAt});if(!persist())Object.assign(v,old);render()};
   let deleteId=null;$('applicationList').onclick=e=>{const edit=e.target.closest('[data-app-edit]'),remove=e.target.closest('[data-app-delete]');if(edit)open(edit.dataset.appEdit);if(remove){deleteId=remove.dataset.appDelete;const v=db.applications.find(v=>v.id===deleteId);$('applicationDeleteDescription').textContent=`Excluir “${v.role}” na ${v.company}, incluindo observações e histórico de status?`;removeDialog.showModal()}};
   $('cancelDeleteApplication').onclick=()=>removeDialog.close();$('confirmDeleteApplication').onclick=()=>{const previous=db.applications;db.applications=previous.filter(v=>v.id!==deleteId);if(!persist()){db.applications=previous;return}removeDialog.close();render();toast('Candidatura excluída.')};
-  window.Applications={setVisible:visible=>{page.hidden=!visible;if(visible)render()}};render();
+  window.Applications={refresh:()=>{if(!page.hidden)render()},setVisible:visible=>{page.hidden=!visible;if(visible)render()}};render();
 })();

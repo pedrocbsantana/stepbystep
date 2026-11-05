@@ -203,6 +203,13 @@
     </div>
   </div>
   <div class="settings-section">
+    <h3>Sincronização</h3>
+    <p class="small" id="syncStatus"></p>
+    <div id="syncUnlinked" class="row"><input type="password" id="syncKey" placeholder="Chave de sincronização" autocomplete="off" aria-label="Chave de sincronização"><button type="button" class="primary" id="syncConnect">Conectar</button></div>
+    <div id="syncChoice" class="row" hidden><button type="button" class="primary" id="syncUseRemote">Dados da nuvem</button><button type="button" id="syncUseLocal">Dados deste aparelho</button></div>
+    <div id="syncLinked" class="row" hidden><button type="button" class="primary" id="syncNow">Sincronizar agora</button><button type="button" id="syncUnlink">Desconectar</button></div>
+  </div>
+  <div class="settings-section">
     <h3>Avisos</h3>
     <p class="small" id="notifyStatus"></p>
     <div class="row"><button type="button" id="notifyEnable">Ativar avisos</button><button type="button" id="notifyTest" hidden>Testar</button></div>
@@ -231,6 +238,8 @@
 <script src="daily-journal.js"></script>
 <script src="reminders-core.js"></script>
 <script src="notify.js"></script>
+<script src="sync-core.js"></script>
+<script src="sync.js"></script>
 <script src="settings.js"></script>
 </body>
 </html>

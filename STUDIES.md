@@ -83,3 +83,9 @@ No backup, `StudyCore.validateBackup` valida `clareza` quando existe; `mergeBack
 ## App instalável e deploy
 
 `manifest.webmanifest`, `icons/` e `sw.js` tornam o site instalável. O service worker busca a rede primeiro e usa o cache sem internet; dados pessoais não passam por ele. O workflow `.github/workflows/pages.yml` roda os testes e publica `dist` no GitHub Pages a cada push na `main`. `deploy.ps1` automatiza login, criação do repositório, ativação do Pages e push.
+
+## Sincronização
+
+Banco: projeto Neon `plain-brook-55073983` (aws-us-east-2), banco `neondb`. Tabela `sync_docs(key text pk, data jsonb, deleted bool, rev bigint default nextval('sync_rev_seq'), device text, updated_at)`. O app chama o endpoint HTTP `/sql` do Neon direto do navegador com o papel `stepbystep_sync` (criado por SQL, sem `neon_superuser`): `CONNECT`, `USAGE` no schema public, `SELECT/INSERT/UPDATE` em `sync_docs` e `USAGE` na sequência. Sem `DELETE` e sem `CREATE`.
+
+`sync-core.js` quebra o estado em documentos: `day:<data>`, `plan`, `music`, `sections`, `clz:core`, `study:<lista>:<id>`, `app:<id>`, `clz:<lista>:<id>`. Não sincroniza `meta`, `focusPrefs`, `deletedDays`, `study.active` nem preferências de aviso. Cada aparelho guarda em `localStorage['stepbystep-sync']` a chave, o último `rev` lido e o hash de cada documento na última sincronização. Ciclo: puxa `rev > último - 20`, aplica o que não foi alterado localmente, envia o que mudou (upsert em lote; remoção vira `deleted = true`). Dias vazios não sobem nem bloqueiam o que vem da nuvem. No primeiro vínculo de um aparelho que já tem dados, o usuário escolhe quem vence os conflitos; o resto é unido.

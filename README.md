@@ -38,6 +38,7 @@ node tests/study-core.test.cjs
 node tests/applications.test.cjs
 node tests/clareza.test.cjs
 node tests/reminders.test.cjs
+node tests/sync.test.cjs
 ```
 
 Os testes também rodam no GitHub antes de cada publicação.
@@ -53,8 +54,12 @@ O site fica em `https://SEU-USUARIO.github.io/stepbystep/`. No celular, abra o l
 
 ## Seus dados
 
-- Ficam **só no navegador** em que você usa o app (`localStorage`, chave `um-passo-v1`). Nada vai para o GitHub.
-- **Cada aparelho tem os seus.** Para levar do PC para o celular: ⚙ → Exportar backup no PC e ⚙ → Importar backup no celular. A importação mescla, sem duplicar.
+- Ficam no navegador (`localStorage`, chave `um-passo-v1`). Nada vai para o GitHub.
+- **Sincronização (opcional):** ⚙ → Sincronização → cole a chave e conecte. Faça o mesmo em cada aparelho. A partir daí, cada mudança sobe para o banco Postgres no Neon em poucos segundos, e os outros aparelhos puxam ao abrir, ao voltar para o app e a cada minuto. Funciona offline e sincroniza quando a internet volta.
+  - O app usa um papel do banco (`stepbystep_sync`) que só pode ler, inserir e atualizar a tabela `sync_docs`. A chave é a senha desse papel: fica só nos seus aparelhos, não está no código nem no backup.
+  - Conflito: se os dois aparelhos mudarem a mesma coisa (o mesmo dia, a mesma anotação) sem sincronizar, vale a última versão enviada.
+  - Para trocar a chave: no SQL Editor do Neon, `ALTER ROLE stepbystep_sync PASSWORD '...';` e conecte de novo nos aparelhos.
+- Sem sincronização, use ⚙ → Exportar/Importar backup para levar dados entre aparelhos.
 - Limpar os dados do site no navegador apaga tudo. Faça backup de vez em quando (o app lembra depois de 7 dias).
 
 ## Estrutura
@@ -74,6 +79,8 @@ dist/                 site publicado
   settings.js         tema, seções, backup e registro do app (PWA)
   reminders-core.js   regras puras de lembretes e geração do .ics
   notify.js           avisos do sistema e exportação para calendário
+  sync-core.js        regras puras da sincronização (documentos, mudanças, conflitos)
+  sync.js             sincronização com o Neon e tela de conexão
   sw.js, manifest.webmanifest, icons/   app instalável e offline
   fonts/              Fraunces e Manrope (OFL), servidas localmente
 tests/                testes em Node, sem dependências
