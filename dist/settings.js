@@ -72,3 +72,8 @@
   const nav=document.querySelector('.main-nav');if(!nav)return;
   nav.addEventListener('click',e=>{const b=e.target.closest('button');if(b)b.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})});
 })();
+
+/* PWA: permite instalar na tela inicial e abrir offline (só funciona em http/https). */
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}

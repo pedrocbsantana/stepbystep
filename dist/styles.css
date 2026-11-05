@@ -680,3 +680,9 @@ body.has-floating-focus footer{padding-bottom:96px}
   .sos-results .quiet{margin-left:0}
 }
 .clz-chips .chip-button[aria-pressed=true]::before{content:'✓ ';color:var(--accent)}
+
+/* ---------- 21. App instalado (PWA) ---------- */
+@supports (padding:max(0px)){
+  header{padding-top:max(12px,env(safe-area-inset-top))}
+  footer{padding-bottom:max(32px,env(safe-area-inset-bottom))}
+}
