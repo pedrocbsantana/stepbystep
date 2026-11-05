@@ -1,0 +1,15 @@
+STEPBYSTEP — Arquivos do site
+
+A pasta dist contém o site completo: HTML, CSS e JavaScript.
+A pasta tests contém os testes das regras de estudos e candidaturas.
+STUDIES.md contém a documentação técnica.
+
+Para abrir com um servidor local (Python instalado):
+  python -m http.server 8080 --directory dist
+Depois acesse http://localhost:8080 no navegador.
+Também pode usar o Live Server do VS Code apontando para dist/index.html.
+
+O projeto não exige instalação de pacotes nem etapa de build.
+Para hospedagem estática, publique o conteúdo de dist.
+
+Os dados pessoais não ficam nos arquivos do site. Eles continuam no navegador em que você usa o aplicativo. Para levá-los para outro endereço, exporte o backup pelo StepByStep atual e importe no novo endereço.
