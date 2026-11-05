@@ -5,14 +5,14 @@
   function loadJournal(){
     $('dailyJournal').value=typeof day.journal==='string'?day.journal:'';
     $('journalDate').textContent=new Date(date+'T12:00:00').toLocaleDateString('pt-BR');
-    $('journalSave').textContent='Salvo automaticamente neste navegador.';
+    $('journalSave').textContent='';
     updateCount();
   }
   $('dailyJournal').addEventListener('input',()=>{
     day.journal=$('dailyJournal').value;
     updateCount();
-    try{localStorage.setItem(key,JSON.stringify(db));$('journalSave').textContent='Salvo automaticamente.'}
-    catch{$('journalSave').textContent='Não foi possível salvar. Exporte um backup para preservar seu texto.'}
+    try{localStorage.setItem(key,JSON.stringify(db));$('journalSave').textContent='Salvo'}
+    catch{$('journalSave').textContent='Falha ao salvar. Exporte um backup.'}
   });
   window.DailyJournal={load:loadJournal};
   loadJournal();

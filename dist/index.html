@@ -18,7 +18,7 @@
 </head>
 <body>
 <header>
-  <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="brand-name">stepbystep</span><span class="brand-tagline">arroz com feijão, todo dia.</span></div>
+  <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="brand-name">stepbystep</span></div>
   <div class="tag"></div>
   <div class="header-actions">
     <button type="button" class="icon-button" id="themeToggle" aria-label="Alternar tema claro e escuro" title="Tema"></button>
@@ -29,9 +29,8 @@
 <main>
   <div class="intro">
     <div>
-      <div class="eyebrow" id="introDate">Seu espaço de foco</div>
-      <h1 id="introTitle">Hoje, um passo de cada vez.</h1>
-      <p>Escolha o próximo passo. O resto pode esperar.</p>
+      <div class="eyebrow" id="introDate"></div>
+      <h1 id="introTitle"></h1>
       <div class="day-summary" id="daySummary" aria-label="Resumo do dia"></div>
     </div>
     <div class="day-nav">
@@ -42,70 +41,66 @@
     </div>
   </div>
 
-  <div class="nudge" id="backupNudge" role="status" hidden><span id="backupNudgeText"></span><span class="nudge-actions"><button type="button" class="primary" id="backupNow">Fazer backup agora</button><button type="button" id="backupLater">Lembrar depois</button></span></div>
+  <div class="nudge" id="backupNudge" role="status" hidden><span id="backupNudgeText"></span><span class="nudge-actions"><button type="button" class="primary" id="backupNow">Fazer backup</button><button type="button" id="backupLater">Depois</button></span></div>
 
   <!-- Passos 01 e 02: planejar e focar -->
   <div class="layout">
     <section class="card" id="plan" aria-labelledby="planTitle">
-      <div class="heading"><h2 id="planTitle"><span class="step">01</span>Seu plano do dia</h2><span class="pill" id="total"></span></div>
-      <p class="small">Ajuste os blocos ao seu dia, sem horários fixos.</p>
-      <p class="reorder-hint" id="reorderHint">Arraste pela alça ⠿ para ordenar. Com o teclado, use ↑ e ↓ na alça.</p>
+      <div class="heading"><h2 id="planTitle">Seu plano do dia</h2><span class="pill" id="total"></span></div>
+      <p class="sr-only" id="reorderHint">Arraste pela alça para ordenar. Com o teclado, use as setas na alça.</p>
       <div id="blocks"></div>
       <span id="reorderStatus" class="sr-only" aria-live="polite"></span>
       <div class="progress"><div id="progress"></div></div>
-      <div class="heading" style="margin:0"><span class="small" id="completed"></span><span class="plan-actions"><button class="quiet" id="savePlanTemplate" title="Os próximos dias começam com estes blocos">Salvar como modelo</button><button class="quiet" id="addBlock">+ Adicionar bloco</button></span></div>
+      <div class="heading" style="margin:0"><span class="small" id="completed"></span><span class="plan-actions"><button class="quiet" id="savePlanTemplate" title="Os próximos dias começam com estes blocos">Salvar como modelo</button><button class="quiet" id="addBlock">Adicionar bloco</button></span></div>
       <p class="small plan-status" id="planStatus" role="status"></p>
     </section>
 
     <section class="card focus-card" aria-labelledby="focusTitle">
-      <div class="heading"><h2 id="focusTitle"><span class="step">02</span>Uma tarefa, agora</h2><button class="quiet" id="focusMode">Expandir foco ↗</button></div>
-      <label for="task" class="small">Qual é o menor próximo passo?</label>
-      <input id="task" type="text" placeholder="Ex.: criar uma CDS view simples">
-      <div class="task-suggestion" id="taskSuggestion" hidden><span class="small">Você deixou para hoje:</span> <strong id="taskSuggestionText"></strong> <button type="button" class="chip-button" id="useSuggestion">Usar</button></div>
+      <div class="heading"><h2 id="focusTitle">Foco</h2><button class="quiet" id="focusMode">Expandir</button></div>
+      <label for="task" class="sr-only">Tarefa</label>
+      <input id="task" type="text" placeholder="Próxima tarefa">
+      <div class="task-suggestion" id="taskSuggestion" hidden><span class="small">De ontem:</span> <strong id="taskSuggestionText"></strong> <button type="button" class="chip-button" id="useSuggestion">Usar</button></div>
       <div class="timer-wrap"><svg class="timer-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="timerRing" cx="60" cy="60" r="54"/></svg><div class="timer" id="clock" role="timer">10:00</div></div>
-      <div class="timer-note" id="timerNote" aria-live="polite">Só estes minutos. Você pode começar pequeno.</div>
-      <div class="actions"><button class="primary" id="start">▶ Começar</button><button id="reset" aria-label="Reiniciar timer">↻ Reiniciar</button></div>
+      <div class="timer-note" id="timerNote" aria-live="polite"></div>
+      <div class="actions"><button class="primary" id="start">Começar</button><button id="reset" aria-label="Reiniciar timer">Reiniciar</button></div>
       <div class="under">
         <label class="small">Duração <input id="timerMinutes" type="number" min="1" max="180" value="10" class="duration" aria-label="Duração do timer em minutos"> min</label>
-        <button class="quiet" id="finishTask">Concluir tarefa ✓</button>
+        <button class="quiet" id="finishTask">Concluir tarefa</button>
       </div>
       <div class="small" id="sessions"></div>
       <div class="focus-music">
-        <div class="music-heading"><strong>♫ Música para focar</strong><button class="quiet" id="addMusic">+ Playlist</button></div>
+        <div class="music-heading"><strong>Música</strong><button class="quiet" id="addMusic">Adicionar playlist</button></div>
         <div class="music-select"><select id="musicSelect" aria-label="Playlist para o foco"><option value="">Sem música</option></select><button id="removeMusic" aria-label="Remover playlist selecionada" hidden>×</button></div>
         <form id="musicForm" class="music-form" hidden>
-          <label for="musicName">Nome</label><input type="text" id="musicName" placeholder="Ex.: meu lofizinho" maxlength="80" required>
-          <label for="musicURL">Link da playlist ou vídeo do YouTube</label><input type="text" id="musicURL" placeholder="https://www.youtube.com/playlist?list=…" required>
+          <label for="musicName">Nome</label><input type="text" id="musicName" placeholder="Nome" maxlength="80" required>
+          <label for="musicURL">Link do YouTube</label><input type="text" id="musicURL" placeholder="https://www.youtube.com/playlist?list=…" required>
           <div class="music-error" id="musicError" role="alert"></div>
           <div class="music-form-actions"><button type="button" id="cancelMusic">Cancelar</button><button class="primary" type="submit">Salvar playlist</button></div>
         </form>
-        <label class="music-options"><input type="checkbox" id="musicAuto"> Tocar ao começar e pausar junto com o timer</label>
+        <label class="music-options"><input type="checkbox" id="musicAuto"> Acompanhar o timer</label>
         <div id="musicPlayerWrap" class="music-player" hidden>
           <div id="youtubePlayer"></div>
-          <div class="music-controls"><button id="playMusic">▶ Tocar música</button><button id="pauseMusic">Ⅱ Pausar música</button><a id="youtubeLink" target="_blank" rel="noopener noreferrer">Abrir no YouTube ↗</a></div>
+          <div class="music-controls"><button id="playMusic">Tocar</button><button id="pauseMusic">Pausar</button><a id="youtubeLink" target="_blank" rel="noopener noreferrer">YouTube</a></div>
           <label class="music-volume">Volume <input id="musicVolume" aria-label="Volume da música" type="range" min="0" max="100" value="35"><span id="volumeValue">35%</span></label>
         </div>
-        <div id="musicStatus" class="music-status" aria-live="polite">Adicione seu link de lofi, escolha a playlist e comece o foco.</div>
+        <div id="musicStatus" class="music-status" aria-live="polite"></div>
       </div>
     </section>
 
     <!-- Passo 03: capturar durante o dia -->
-    <section class="card capture-card" aria-labelledby="captureTitle">
-      <div class="heading"><h2 id="captureTitle"><span class="step">03</span>Durante o dia</h2></div>
+    <section class="card capture-card" aria-label="Checklist e distrações">
       <div class="capture-cols">
         <div class="capture-col">
-          <h3>Checklist essencial <span class="small" id="checkCount"></span></h3>
-          <p class="small">Passos pequenos e concretos para este dia.</p>
-          <form class="entry" id="checkForm"><input id="checkInput" placeholder="Adicionar um pequeno passo…" aria-label="Nova tarefa do checklist" maxlength="250"><button aria-label="Adicionar tarefa">+</button></form>
+          <h3>Checklist <span class="small" id="checkCount"></span></h3>
+          <form class="entry" id="checkForm"><input id="checkInput" placeholder="Adicionar item" aria-label="Nova tarefa do checklist" maxlength="250"><button aria-label="Adicionar tarefa">+</button></form>
           <button type="button" class="chip-button carry" id="carryChecks" hidden></button>
           <ul class="items" id="checklist"></ul>
         </div>
         <div class="capture-col">
-          <h3>Estacionamento de distrações <span aria-hidden="true" class="small">↳</span></h3>
-          <p class="small">Pensou em outra coisa? Anote aqui e volte à tarefa.</p>
-          <form class="entry" id="distractionForm"><input id="distractionInput" placeholder="Deixo isso para depois…" aria-label="Nova distração" maxlength="250"><button aria-label="Registrar distração">+</button></form>
+          <h3>Distrações</h3>
+          <form class="entry" id="distractionForm"><input id="distractionInput" placeholder="Anotar e voltar ao foco" aria-label="Nova distração" maxlength="250"><button aria-label="Registrar distração">+</button></form>
           <ul class="items" id="distractions"></ul>
-          <div id="emptyDistractions" class="small" style="margin-top:12px">Seu espaço para tirar as ideias da cabeça.</div>
+          <div id="emptyDistractions" hidden></div>
         </div>
       </div>
     </section>
@@ -121,13 +116,13 @@
       </div>
     </div>
     <div class="calendar-main">
-      <div class="calendar-mobile-note" id="calendarMobileNote" hidden>Na visão semanal, deslize para os lados para ver todos os dias.</div>
+      <div class="calendar-mobile-note" id="calendarMobileNote" hidden>Deslize para ver a semana.</div>
       <div class="calendar-x"><div class="calendar-sheet" id="calendarSheet"><div class="calendar-days" id="calendarDays"></div><div class="agenda-scroll" id="agendaScroll"><div class="agenda-grid" id="agendaGrid"></div></div></div></div>
     </div>
     <div class="agenda-footer">
-      <div class="agenda-info"><span class="small" id="agendaCount"></span><span class="small">Clique em um horário para criar, ou em um compromisso para editar.</span></div>
+      <div class="agenda-info"><span class="small" id="agendaCount"></span></div>
       <div class="agenda-list" id="agendaList"></div>
-      <p class="small" id="agendaEmpty">Nenhum compromisso neste período.</p>
+      <p class="small" id="agendaEmpty" hidden></p>
     </div>
   </section>
 
@@ -135,49 +130,46 @@
   <div class="grid-2 row-gap">
     <div id="studyDashboardSlot"></div>
     <section class="card" aria-labelledby="weekTitle">
-      <div class="heading"><h2 id="weekTitle">Consistência, sem cobrança</h2><span class="pill" id="weekCount"></span></div>
-      <p class="small">Um dia conta quando você conclui um bloco ou uma rodada de foco.</p>
+      <div class="heading"><h2 id="weekTitle">Consistência</h2><span class="pill" id="weekCount"></span></div>
       <div class="week" id="week"></div>
-      <div class="heading" style="margin:0"><button class="quiet" id="prevWeek">← Anterior</button><span id="weekLabel" class="small"></span><button class="quiet" id="nextWeek">Próxima →</button></div>
-      <p class="small" style="margin-top:14px">Repetir o básico já é progresso.</p>
+      <div class="heading" style="margin:0"><button class="quiet" id="prevWeek" aria-label="Semana anterior">←</button><span id="weekLabel" class="small"></span><button class="quiet" id="nextWeek" aria-label="Próxima semana">→</button></div>
     </section>
   </div>
 
   <!-- Passo 04: fechar o dia (revisão + escrita livre) -->
   <section class="card close-day row-gap" aria-labelledby="reviewTitle">
-    <div class="heading"><h2 id="reviewTitle"><span class="step">04</span>Fechar o dia</h2><span class="small" id="reviewStatus">No seu tempo</span></div>
+    <div class="heading"><h2 id="reviewTitle">Fechar o dia</h2><span class="small" id="reviewStatus"></span></div>
     <div class="close-day-cols">
       <div class="close-day-review">
         <label class="caption" for="wentWell">O que funcionou hoje?</label>
-        <textarea id="wentWell" placeholder="Mesmo que tenha sido só começar."></textarea>
+        <textarea id="wentWell"></textarea>
         <label class="caption" for="nextStep">Qual é o primeiro passo de amanhã?</label>
-        <textarea id="nextStep" placeholder="Deixe um passo fácil de retomar. Ele aparece amanhã como sugestão."></textarea>
+        <textarea id="nextStep"></textarea>
         <div class="review-foot"><label class="small">Como foi? <select id="feeling"><option value="">Escolher</option><option>Difícil</option><option>Razoável</option><option>Bom</option></select></label><button class="primary" id="saveReview">Salvar revisão</button></div>
       </div>
       <div class="daily-journal">
         <div class="journal-head"><label for="dailyJournal" class="caption" id="journalTitle">Escrita livre</label><span class="small" id="journalDate"></span></div>
-        <textarea id="dailyJournal" placeholder="Seu espaço para colocar para fora. Pode começar de qualquer jeito…" spellcheck="true"></textarea>
-        <div class="journal-footer"><span class="small" id="journalSave" role="status">Salvo automaticamente neste navegador.</span><span class="small" id="journalCount">0 caracteres</span></div>
+        <textarea id="dailyJournal" spellcheck="true"></textarea>
+        <div class="journal-footer"><span class="small" id="journalSave" role="status"></span><span class="small" id="journalCount" hidden></span></div>
       </div>
     </div>
   </section>
 
   <!-- Histórico de dias -->
   <details class="card history row-gap" id="historyPanel">
-    <summary><div><h2>Meus dias</h2><span class="small" id="historySummary">Seu caminho, um dia por vez.</span></div></summary>
-    <p class="small">Abra um dia para ver seu plano, tarefas, distrações e revisão. Os registros são deste navegador.</p>
+    <summary><div><h2>Meus dias</h2><span class="small" id="historySummary"></span></div></summary>
     <div class="history-wrap"><table><thead><tr><th scope="col">Dia</th><th scope="col">Blocos</th><th scope="col">Agenda</th><th scope="col">Foco</th><th scope="col">Checklist</th><th scope="col">Revisão</th><th scope="col"><span class="sr-only">Ações</span></th></tr></thead><tbody id="historyRows"></tbody></table></div>
     <div id="deletedNotice" class="deleted-notice" role="status" hidden><span id="deletedMessage"></span><button id="undoDeleteDay">Desfazer exclusão</button></div>
-    <p class="small" id="historyEmpty">Os dias aparecem aqui conforme você usa sua rotina.</p>
+    <p class="small" id="historyEmpty">Nenhum dia registrado.</p>
   </details>
 </main>
 
-<footer><span>O básico bem feito, no seu ritmo.</span><span id="saveStatus">Dados salvos neste navegador.</span></footer>
+<footer><span id="saveStatus"></span></footer>
 
 <dialog id="deleteDayDialog" aria-labelledby="deleteDayTitle">
   <h2 id="deleteDayTitle">Apagar dia?</h2>
   <p class="delete-summary" id="deleteDaySummary"></p>
-  <p class="small" id="deleteDayHint">Os registros dos outros dias e suas playlists serão mantidos. Você pode desfazer por até 30 dias, em Meus dias.</p>
+  <p class="small" id="deleteDayHint">Dá para desfazer por 30 dias.</p>
   <div class="delete-actions"><button id="cancelDeleteDay">Cancelar</button><button class="danger" id="confirmDeleteDay">Apagar dia</button></div>
 </dialog>
 
@@ -185,9 +177,9 @@
   <form class="event-form" id="eventForm">
     <div class="heading"><h2 id="eventDialogTitle">Novo compromisso</h2><button type="button" id="closeEvent" class="remove" aria-label="Fechar formulário">×</button></div>
     <label for="eventDay">Data</label><input id="eventDay" type="date" required>
-    <label for="eventTitle">Compromisso</label><input id="eventTitle" required maxlength="150" placeholder="Ex.: entrevista, consulta, reunião">
+    <label for="eventTitle">Compromisso</label><input id="eventTitle" required maxlength="150" >
     <div class="event-times"><div><label for="eventStart">Início</label><input id="eventStart" type="time" required></div><div><label for="eventEnd">Fim</label><input id="eventEnd" type="time" required></div></div>
-    <label for="eventNotes">Observações (opcional)</label><textarea id="eventNotes" maxlength="2000" placeholder="Local, link ou o que precisa lembrar."></textarea>
+    <label for="eventNotes">Observações (opcional)</label><textarea id="eventNotes" maxlength="2000" ></textarea>
     <label class="inline-label"><input type="checkbox" id="eventDone"> Compromisso concluído</label>
     <div class="event-error" id="eventError" role="alert"></div>
     <div class="event-buttons"><button type="button" id="deleteEvent">Excluir</button><button type="button" id="cancelEvent">Cancelar</button><button class="primary" type="submit">Salvar</button></div>
@@ -198,12 +190,10 @@
   <div class="settings-head"><h2 id="settingsTitle">Configurações</h2><button type="button" class="remove" id="closeSettings" aria-label="Fechar configurações">×</button></div>
   <div class="settings-section">
     <h3>Aparência</h3>
-    <p class="small">Escolha o tema. “Sistema” acompanha a configuração do seu computador.</p>
     <div class="segmented" role="group" aria-label="Tema"><button type="button" data-theme-choice="dark">Escuro</button><button type="button" data-theme-choice="light">Claro</button><button type="button" data-theme-choice="system">Sistema</button></div>
   </div>
   <div class="settings-section">
     <h3>Seções</h3>
-    <p class="small">Esconda o que não estiver usando agora. Nada é apagado.</p>
     <div class="section-toggles" id="sectionToggles">
       <label><input type="checkbox" data-section="agenda"> Agenda no Meu dia</label>
       <label><input type="checkbox" data-section="studies"> Estudos, Revisões e Histórico</label>
@@ -213,7 +203,7 @@
   </div>
   <div class="settings-section">
     <h3>Backup</h3>
-    <p class="small">Seus dados ficam só neste navegador. O backup inclui dias, agenda, estudos, revisões, candidaturas, Clareza e playlists. Guarde o arquivo em local seguro.</p>
+    <p class="small">Os dados ficam só neste navegador.</p>
     <p class="small" id="lastBackupInfo"></p>
     <div class="row"><button type="button" class="primary" id="settingsExport">Exportar backup</button><button type="button" id="settingsImport">Importar backup</button></div>
   </div>

@@ -10,7 +10,7 @@
   dock.setAttribute('aria-label','Pomodoro e música');
   const bar=document.createElement('div');
   bar.className='focus-dock-bar';
-  bar.innerHTML='<button type="button" id="focusDockHandle" aria-label="Mover janela de foco. Use as setas do teclado.">⠿ <span class="dock-caption">Seu foco continua aqui</span><span id="focusDockMiniClock" aria-label="Tempo restante" role="timer">10:00</span></button><button type="button" id="focusDockToggle" aria-label="Minimizar Pomodoro" aria-expanded="true" aria-controls="focusDockContent">−</button><button type="button" id="focusDockHome" aria-label="Voltar ao painel diário">↗</button>';
+  bar.innerHTML='<button type="button" id="focusDockHandle" aria-label="Mover janela de foco. Use as setas do teclado.">⠿ <span class="dock-caption">Foco</span><span id="focusDockMiniClock" aria-label="Tempo restante" role="timer">10:00</span></button><button type="button" id="focusDockToggle" aria-label="Minimizar Pomodoro" aria-expanded="true" aria-controls="focusDockContent">−</button><button type="button" id="focusDockHome" aria-label="Voltar ao painel diário">↗</button>';
   card.id='focusDockContent';
   dock.append(bar,card);
   document.body.append(dock);
@@ -86,7 +86,7 @@
     view=next;dock.classList.toggle('floating',view!=='dashboard');
     document.body.classList.toggle('has-floating-focus',view!=='dashboard');
     refreshCompact();
-    $('focusMode').textContent=view==='dashboard'?'Expandir foco ↗':'Voltar ao meu dia ↗';
+    $('focusMode').textContent=view==='dashboard'?'Expandir':'Voltar';
     if(view==='dashboard')sync();else{
       dock.style.width='';dock.style.left='';dock.style.top='';dock.style.right='';dock.style.bottom='';sync();
     }

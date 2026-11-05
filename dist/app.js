@@ -88,10 +88,10 @@ function save() {
   try {
     localStorage.setItem(key, JSON.stringify(db));
     $("saveStatus").textContent =
-      "Salvo neste navegador • seus dados ficam neste dispositivo.";
+      "Salvo";
   } catch {
     $("saveStatus").textContent =
-      "Não foi possível salvar. Verifique o armazenamento do navegador.";
+      "Falha ao salvar";
   }
 }
 // Lembrete gentil de backup: os dados só existem neste navegador.
@@ -104,8 +104,8 @@ function renderBackupNudge() {
   $("backupNudge").hidden = !show;
   if (show)
     $("backupNudgeText").textContent = last
-      ? `Seu último backup foi há ${Math.floor((Date.now() - last) / 864e5)} dias. Seus dados ficam só neste navegador.`
-      : "Você ainda não fez nenhum backup. Seus dados ficam só neste navegador.";
+      ? `Último backup há ${Math.floor((Date.now() - last) / 864e5)} dias.`
+      : "Nenhum backup ainda.";
 }
 window.renderBackupNudge = renderBackupNudge;
 $("backupNow").onclick = () => $("exportStudy").click();
@@ -133,13 +133,8 @@ function load() {
         day: "numeric",
         month: "long",
       });
-    $("introDate").textContent = date === t ? "Hoje · " + label : label;
-    $("introTitle").textContent =
-      date === t
-        ? "Hoje, um passo de cada vez."
-        : date < t
-          ? "Olhando para trás, com calma."
-          : "Preparando o caminho.";
+    $("introDate").textContent = date === t ? "Hoje" : "";
+    $("introTitle").textContent = label.charAt(0).toUpperCase() + label.slice(1);
   }
   ["task", "wentWell", "nextStep", "feeling", "timerMinutes"].forEach(
     (k) => ($(k).value = day[k]),
@@ -182,10 +177,8 @@ function render() {
   renderLists();
   renderWeek();
   $("sessions").textContent =
-    `${day.rounds} rodada${day.rounds === 1 ? "" : "s"} de foco concluída${day.rounds === 1 ? "" : "s"} hoje`;
-  $("reviewStatus").textContent = day.reviewed
-    ? "Revisão salva ✓"
-    : "No seu tempo";
+    `${day.rounds} rodada${day.rounds === 1 ? "" : "s"} de foco`;
+  $("reviewStatus").textContent = day.reviewed ? "Salvo" : "";
 }
 function renderBlocks() {
   $("blocks").innerHTML = day.blocks
@@ -197,8 +190,8 @@ function renderBlocks() {
   let n = day.blocks.filter((b) => b.done).length,
     total = day.blocks.reduce((a, b) => a + Number(b.min), 0);
   $("total").textContent =
-    `${Math.floor(total / 60)}h${String(total % 60).padStart(2, "0")} planejadas`;
-  $("completed").textContent = `${n} de ${day.blocks.length} blocos concluídos`;
+    `${Math.floor(total / 60)}h${String(total % 60).padStart(2, "0")}`;
+  $("completed").textContent = `${n}/${day.blocks.length} concluídos`;
   $("progress").style.width =
     (day.blocks.length ? (n / day.blocks.length) * 100 : 0) + "%";
 }
@@ -229,7 +222,7 @@ $("blocks").addEventListener("click", (e) => {
 $("savePlanTemplate").onclick = () => {
   db.planTemplate = day.blocks.map(({ name, min }) => ({ name, min }));
   save();
-  $("planStatus").textContent = "Modelo salvo. Os próximos dias começam com estes blocos.";
+  $("planStatus").textContent = "Modelo salvo.";
   setTimeout(() => ($("planStatus").textContent = ""), 4000);
 };
 $("addBlock").onclick = () => {
@@ -242,7 +235,7 @@ function renderLists() {
   $("checklist").innerHTML = day.checks
     .map(
       (c, i) =>
-        `<li class="${c.done ? "done" : ""} ${c.movedTo ? "moved" : ""}"><input type="checkbox" data-check="${i}" ${c.done ? "checked" : ""} ${c.movedTo ? "disabled" : ""} aria-label="Concluir ${escapeHTML(c.text)}"><span>${escapeHTML(c.text)}${c.movedTo ? ` <small>→ levada para ${shortDate(c.movedTo)}</small>` : ""}</span><button class="remove" data-delcheck="${i}" aria-label="Remover tarefa">×</button></li>`,
+        `<li class="${c.done ? "done" : ""} ${c.movedTo ? "moved" : ""}"><input type="checkbox" data-check="${i}" ${c.done ? "checked" : ""} ${c.movedTo ? "disabled" : ""} aria-label="Concluir ${escapeHTML(c.text)}"><span>${escapeHTML(c.text)}${c.movedTo ? ` <small>levada para ${shortDate(c.movedTo)}</small>` : ""}</span><button class="remove" data-delcheck="${i}" aria-label="Remover tarefa">×</button></li>`,
     )
     .join("");
   $("checkCount").textContent =
@@ -250,7 +243,7 @@ function renderLists() {
   $("distractions").innerHTML = day.distractions
     .map(
       (t, i) =>
-        `<li><span>${escapeHTML(t)}</span><button type="button" class="chip-button" data-distask="${i}" title="Virar tarefa no checklist de amanhã">→ amanhã</button><button class="remove" data-deldis="${i}" aria-label="Remover distração">×</button></li>`,
+        `<li><span>${escapeHTML(t)}</span><button type="button" class="chip-button" data-distask="${i}" title="Mover para o checklist de amanhã">Amanhã</button><button class="remove" data-deldis="${i}" aria-label="Remover distração">×</button></li>`,
     )
     .join("");
   $("emptyDistractions").hidden = day.distractions.length > 0;
@@ -282,7 +275,7 @@ function renderCarry() {
   $("carryChecks").hidden = !src;
   if (src)
     $("carryChecks").textContent =
-      `↩ Trazer ${src.open.length} pendência${src.open.length === 1 ? "" : "s"} de ${shortDate(src.date)}`;
+      `Trazer ${src.open.length} pendência${src.open.length === 1 ? "" : "s"} de ${shortDate(src.date)}`;
 }
 $("carryChecks").onclick = () => {
   const src = carrySource();
@@ -304,7 +297,7 @@ $("distractions").addEventListener("click", (e) => {
   db.days[next].checks.push({ text, done: false, from: date });
   save();
   renderLists();
-  $("saveStatus").textContent = `“${text}” foi para o checklist de ${shortDate(next)}.`;
+  $("saveStatus").textContent = `Movido para ${shortDate(next)}.`;
 });
 $("checkForm").onsubmit = (e) => {
   e.preventDefault();
@@ -355,10 +348,10 @@ function clock() {
   $("timerRing").style.strokeDashoffset = RING * (1 - progress);
   document.querySelector(".focus-card").classList.toggle("is-running", running);
   $("start").textContent = running
-    ? "Ⅱ Pausar"
+    ? "Pausar"
     : remaining === 0
-      ? "↻ Nova rodada"
-      : "▶ Começar";
+      ? "Nova rodada"
+      : "Começar";
 }
 function pause() {
   window.StudyBridge?.onPause();
@@ -383,7 +376,7 @@ function finish() {
   clock();
   render();
   $("timerNote").textContent =
-    "Rodada concluída. Respire e escolha se quer continuar.";
+    "Rodada concluída.";
 }
 function tick() {
   remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
@@ -398,14 +391,14 @@ $("start").onclick = () => {
   if (!$("task").value.trim()) {
     $("task").focus();
     $("timerNote").textContent =
-      "Escreva primeiro um pequeno passo para esta rodada.";
+      "Escreva a tarefa primeiro.";
     return;
   }
   if (!remaining) remaining = day.timerMinutes * 60;
   running = true;
   end = Date.now() + remaining * 1000;
   interval = setInterval(tick, 250);
-  $("timerNote").textContent = "Uma coisa por vez. Se distrair, anote e volte.";
+  $("timerNote").textContent = "";
   startFocusMusic();
   window.StudyBridge?.onStart();
   clock();
@@ -416,7 +409,7 @@ $("reset").onclick = () => {
   day.remaining = remaining;
   save();
   clock();
-  $("timerNote").textContent = "Só estes minutos. Você pode começar pequeno.";
+  $("timerNote").textContent = "";
 };
 $("timerMinutes").onchange = () => {
   pause();
@@ -446,11 +439,11 @@ $("finishTask").onclick = () => {
   renderLists();
   clock();
   $("timerNote").textContent =
-    "Tarefa concluída. Escolha o próximo pequeno passo.";
+    "Tarefa concluída.";
 };
 $("focusMode").onclick = () => {
   let active = document.body.classList.toggle("focus-mode");
-  $("focusMode").textContent = active ? "Voltar ao dia ↙" : "Expandir foco ↗";
+  $("focusMode").textContent = active ? "Voltar" : "Expandir";
 };
 ["task", "wentWell", "nextStep", "feeling"].forEach((k) =>
   $(k).addEventListener("input", () => {
@@ -458,15 +451,13 @@ $("focusMode").onclick = () => {
     if (k !== "task") day.reviewed = false;
     if (k === "task") renderSuggestion();
     save();
-    $("reviewStatus").textContent = day.reviewed
-      ? "Revisão salva ✓"
-      : "No seu tempo";
+    $("reviewStatus").textContent = day.reviewed ? "Salvo" : "";
   }),
 );
 $("saveReview").onclick = () => {
   day.reviewed = true;
   save();
-  $("reviewStatus").textContent = "Revisão salva ✓";
+  $("reviewStatus").textContent = "Salvo";
 };
 function selectDay(value) {
   if (!value) return;
@@ -475,7 +466,7 @@ function selectDay(value) {
   weekOffset = 0;
   load();
   save();
-  $("timerNote").textContent = "Um novo passo, no seu ritmo.";
+  $("timerNote").textContent = "";
 }
 function shiftDay(amount) {
   let d = new Date(date + "T12:00:00");
@@ -499,7 +490,7 @@ function renderHistory() {
     .sort()
     .reverse();
   $("historySummary").textContent =
-    `${dates.length} dia${dates.length === 1 ? "" : "s"} registrado${dates.length === 1 ? "" : "s"} · selecione para consultar`;
+    `${dates.length} dia${dates.length === 1 ? "" : "s"}`;
   $("historyEmpty").hidden = dates.length > 0;
   $("historyRows").innerHTML = dates
     .map((d) => {
@@ -510,7 +501,7 @@ function renderHistory() {
           month: "2-digit",
           year: "numeric",
         });
-      return `<tr class="${d === date ? "selected" : ""}"><td>${escapeHTML(label)}${d === localDate(new Date()) ? " · hoje" : ""}</td><td>${v.blocks.filter((b) => b.done).length}/${v.blocks.length}</td><td>${(v.appointments || []).length} compromisso${(v.appointments || []).length === 1 ? "" : "s"}</td><td>${v.rounds} rodada${v.rounds === 1 ? "" : "s"}</td><td>${v.checks.filter((c) => c.done).length}/${v.checks.length}</td><td>${v.reviewed ? "Salva ✓" : v.wentWell || v.nextStep || v.feeling ? "Em andamento" : "Sem revisão"}</td><td><button data-open-day="${d}" aria-label="Abrir dia ${escapeHTML(label)}" ${d === date ? 'aria-current="date"' : ""}>${d === date ? "Aberto" : "Abrir →"}</button>${d < localDate(new Date()) ? `<button class="delete-day" data-delete-day="${d}" aria-label="Apagar dia ${escapeHTML(label)}">Apagar dia</button>` : ""}</td></tr>`;
+      return `<tr class="${d === date ? "selected" : ""}"><td>${escapeHTML(label)}${d === localDate(new Date()) ? " · hoje" : ""}</td><td>${v.blocks.filter((b) => b.done).length}/${v.blocks.length}</td><td>${(v.appointments || []).length} compromisso${(v.appointments || []).length === 1 ? "" : "s"}</td><td>${v.rounds} rodada${v.rounds === 1 ? "" : "s"}</td><td>${v.checks.filter((c) => c.done).length}/${v.checks.length}</td><td>${v.reviewed ? "Salva ✓" : v.wentWell || v.nextStep || v.feeling ? "Em andamento" : "Sem revisão"}</td><td><button data-open-day="${d}" aria-label="Abrir dia ${escapeHTML(label)}" ${d === date ? 'aria-current="date"' : ""}>${d === date ? "Aberto" : "Abrir"}</button>${d < localDate(new Date()) ? `<button class="delete-day" data-delete-day="${d}" aria-label="Apagar dia ${escapeHTML(label)}">Apagar dia</button>` : ""}</td></tr>`;
     })
     .join("");
 }
@@ -630,7 +621,7 @@ function renderAgenda() {
   $("calendarSheet").classList.toggle("one-day", calendarView === "day");
   $("calendarSheet").style.setProperty("--days", dates.length);
   $("calendarDays").innerHTML =
-    '<div class="calendar-gutter">Horário<br>local</div>' +
+    '<div class="calendar-gutter"></div>' +
     dates
       .map((d) => {
         const v = new Date(d + "T12:00:00");
@@ -771,7 +762,7 @@ $("eventForm").onsubmit = (e) => {
     minuteValue(end) <= minuteValue(start)
   ) {
     $("eventError").textContent =
-      "Preencha título e data e escolha um fim posterior ao início, no mesmo dia.";
+      "Preencha título e data; o fim deve ser depois do início.";
     return;
   }
   const v = {
@@ -890,7 +881,7 @@ function requestMusicAPI() {
   script.onerror = () => {
     musicAPIRequested = false;
     $("musicStatus").textContent =
-      "Não foi possível carregar o YouTube. Tente tocar novamente ou use Abrir no YouTube.";
+      "Não foi possível carregar o YouTube.";
   };
   document.head.appendChild(script);
 }
@@ -916,19 +907,19 @@ function createMusicPlayer() {
       onStateChange: (e) => {
         if (e.data === 1) {
           musicPendingPlay = false;
-          $("musicStatus").textContent = "Tocando. Uma tarefa de cada vez.";
+          $("musicStatus").textContent = "Tocando.";
         } else if (e.data === 2)
-          $("musicStatus").textContent = "Música pausada.";
+          $("musicStatus").textContent = "Pausada.";
       },
       onAutoplayBlocked: () => {
         musicPendingPlay = false;
         $("musicStatus").textContent =
-          "O navegador bloqueou o início automático. Clique em Tocar música ou no play do vídeo.";
+          "Autoplay bloqueado. Clique em Tocar.";
       },
       onError: () => {
         musicPendingPlay = false;
         $("musicStatus").textContent =
-          "O YouTube não conseguiu reproduzir este conteúdo aqui. Tente outra playlist ou abra no YouTube.";
+          "Não foi possível tocar este link.";
       },
     },
   });
@@ -947,7 +938,7 @@ function playFocusMusic() {
   musicPendingPlay = true;
   $("musicPlayerWrap").hidden = false;
   $("musicStatus").textContent =
-    "Preparando a música… Se não começar, clique no play do vídeo.";
+    "Carregando…";
   if (musicReady) {
     cueSelectedMusic();
     musicPlayer.playVideo();
@@ -974,7 +965,7 @@ $("musicForm").onsubmit = (e) => {
     parsed = parseMusicURL($("musicURL").value);
   if (!name || !parsed) {
     $("musicError").textContent =
-      "Informe um nome e um link válido de playlist ou vídeo do YouTube.";
+      "Informe nome e link válido do YouTube.";
     return;
   }
   const item = {
@@ -997,7 +988,7 @@ $("musicForm").onsubmit = (e) => {
   $("musicForm").hidden = true;
   $("musicError").textContent = "";
   $("musicStatus").textContent =
-    "Playlist selecionada. Comece o timer para tocar junto.";
+    "Playlist selecionada.";
   requestMusicAPI();
   if (musicReady) cueSelectedMusic();
   if (running && db.music.auto) playFocusMusic();
@@ -1013,9 +1004,9 @@ $("musicSelect").onchange = () => {
     requestMusicAPI();
     if (musicReady) cueSelectedMusic();
     $("musicStatus").textContent =
-      "Playlist selecionada. Comece o timer para tocar junto.";
+      "Playlist selecionada.";
     if (running && db.music.auto) playFocusMusic();
-  } else $("musicStatus").textContent = "Sem música nesta rodada.";
+  } else $("musicStatus").textContent = "";
 };
 $("musicAuto").onchange = () => {
   db.music.auto = $("musicAuto").checked;
@@ -1042,7 +1033,7 @@ $("removeMusic").onclick = () => {
   save();
   renderMusic();
   $("musicStatus").textContent =
-    "Playlist removida. Adicione outra quando quiser.";
+    "Playlist removida.";
 };
 renderMusic();
 let pendingDeleteDay = null,
@@ -1067,9 +1058,9 @@ function requestDeleteDay(value) {
     label = new Date(value + "T12:00:00").toLocaleDateString("pt-BR");
   $("deleteDayTitle").textContent = `Apagar o dia ${label}?`;
   $("deleteDaySummary").textContent =
-    `Isso remove todos os registros deste dia: ${v.blocks.length} blocos, ${v.checks.length} tarefas, ${v.distractions.length} distrações, ${(v.appointments || []).length} compromissos, rodadas de foco e revisão.`;
+    `${v.blocks.length} blocos, ${v.checks.length} itens, ${v.distractions.length} distrações, ${(v.appointments || []).length} compromissos.`;
   $("deleteDayHint").textContent =
-    "Os outros dias e suas playlists serão mantidos. Você pode desfazer por até 30 dias, em Meus dias.";
+    "Dá para desfazer por 30 dias.";
   $("confirmDeleteDay").textContent = "Apagar dia";
   $("deleteDayDialog").showModal();
 }
@@ -1098,7 +1089,7 @@ $("undoDeleteDay").onclick = () => {
     $("deleteDayTitle").textContent = "Restaurar os registros anteriores?";
     $("deleteDaySummary").textContent =
       `O dia ${new Date(value + "T12:00:00").toLocaleDateString("pt-BR")} já possui novos registros. Restaurar substituirá esses registros pelos que foram apagados.`;
-    $("deleteDayHint").textContent = "Os outros dias não serão alterados.";
+    $("deleteDayHint").textContent = "";
     $("confirmDeleteDay").textContent = "Restaurar e substituir";
     $("deleteDayDialog").showModal();
   } else restoreDeletedDay(value);

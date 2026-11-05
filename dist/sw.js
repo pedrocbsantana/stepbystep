@@ -1,7 +1,7 @@
 /* Service worker: o app abre offline. Sempre tenta a rede primeiro (para receber
    atualizações) e usa a cópia guardada quando estiver sem internet.
    Os dados pessoais não passam por aqui: ficam no localStorage do navegador. */
-const CACHE = 'stepbystep-v2';
+const CACHE = 'stepbystep-v3';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'app.js', 'applications-core.js', 'clareza-core.js', 'study-core.js', 'studies.js',

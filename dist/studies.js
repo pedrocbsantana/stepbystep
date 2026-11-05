@@ -4,7 +4,7 @@
   db.study??=C.empty();
   let S=db.study,subjectId=S.subjects[0]?.id||'',topicId='',noteId='',view='dashboard',preview=false,query='',focusStartedAt=null,dialogAction=null;
   const root=document.createElement('div');
-  root.innerHTML=`<section id="studyPage" class="study-page" hidden><div class="study-top"><div><div class="eyebrow">Um conceito por vez</div><h1>Estudos</h1><p>Aprenda, explique com suas palavras e retome.</p></div><div class="tools"><button id="exportStudy" hidden>Exportar backup</button><button id="importStudy" hidden>Importar backup</button><input id="studyFile" type="file" accept="application/json,.json" hidden></div></div><div class="study-layout"><aside class="study-sidebar"><input class="study-search" id="studySearch" placeholder="Buscar título, conteúdo ou tag…" aria-label="Buscar anotações"><button class="primary" id="addSubject">+ Matéria</button><div id="studyTree" class="study-tree"></div></aside><div id="studyEditor" class="study-editor"></div></div></section><section id="revisionPage" class="study-page" hidden><div class="study-top"><div><div class="eyebrow">Recuperação ativa</div><h1>Revisões</h1><p>Tente lembrar antes de abrir a anotação.</p></div><button id="reviewGoStudies">Abrir estudos</button></div><details class="review-rules"><summary>Como funciona o agendamento?</summary><p>As etapas são 1, 3, 7 e 15 dias após concluir o estudo. “Lembrei bem” avança; se a data da próxima etapa já passou, ela vai para amanhã. “Não lembrei” repete a mesma etapa amanhã. “Lembrei parcialmente” repete em 2 dias. Cada avaliação fica no histórico. Após a quarta etapa bem lembrada, o ciclo termina. Desativar preserva o histórico; retomar mantém a etapa e reprograma para amanhã se necessário.</p></details><div id="reviewList"></div><h2 class="study-section-title">Próximas revisões</h2><div id="upcomingReviews"></div><h2 class="study-section-title">Revisões concluídas</h2><div id="reviewHistory" class="study-table-wrap"></div></section><section id="studyHistoryPage" class="study-page" hidden><div class="study-top"><div><div class="eyebrow">Progresso real</div><h1>Histórico de estudos</h1><p>Somente sessões registradas. Cada sessão conta uma vez.</p></div><button id="historyGoStudies">Abrir estudos</button></div><div id="studyHistoryContent"></div></section><dialog id="studyDialog" class="study-dialog" aria-labelledby="studyDialogTitle"><form id="studyDialogForm"><h2 id="studyDialogTitle"></h2><div id="studyDialogBody"></div><p id="studyDialogError" class="event-error" role="alert"></p><div class="dialog-buttons"><button type="button" id="studyDialogCancel">Cancelar</button><button class="primary" id="studyDialogSubmit">Salvar</button></div></form></dialog><div id="studyToast" class="study-toast" role="status" hidden></div>`;
+  root.innerHTML=`<section id="studyPage" class="study-page" hidden><div class="study-top"><div><h1>Estudos</h1></div><div class="tools"><button id="exportStudy" hidden>Exportar backup</button><button id="importStudy" hidden>Importar backup</button><input id="studyFile" type="file" accept="application/json,.json" hidden></div></div><div class="study-layout"><aside class="study-sidebar"><input class="study-search" id="studySearch" placeholder="Buscar título, conteúdo ou tag…" aria-label="Buscar anotações"><button class="primary" id="addSubject">+ Matéria</button><div id="studyTree" class="study-tree"></div></aside><div id="studyEditor" class="study-editor"></div></div></section><section id="revisionPage" class="study-page" hidden><div class="study-top"><div><h1>Revisões</h1></div><button id="reviewGoStudies">Abrir estudos</button></div><details class="review-rules"><summary>Como funciona</summary><p>Etapas em 1, 3, 7 e 15 dias. “Lembrei bem” avança; “Parcialmente” repete em 2 dias; “Não lembrei” repete amanhã.</p></details><div id="reviewList"></div><h2 class="study-section-title">Próximas revisões</h2><div id="upcomingReviews"></div><h2 class="study-section-title">Revisões concluídas</h2><div id="reviewHistory" class="study-table-wrap"></div></section><section id="studyHistoryPage" class="study-page" hidden><div class="study-top"><div><h1>Histórico de estudos</h1></div><button id="historyGoStudies">Abrir estudos</button></div><div id="studyHistoryContent"></div></section><dialog id="studyDialog" class="study-dialog" aria-labelledby="studyDialogTitle"><form id="studyDialogForm"><h2 id="studyDialogTitle"></h2><div id="studyDialogBody"></div><p id="studyDialogError" class="event-error" role="alert"></p><div class="dialog-buttons"><button type="button" id="studyDialogCancel">Cancelar</button><button class="primary" id="studyDialogSubmit">Salvar</button></div></form></dialog><div id="studyToast" class="study-toast" role="status" hidden></div>`;
   document.querySelector('footer').before(root);
   const NAV_ICONS={"dashboard": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4\"/>", "studies": "<path d=\"M2.5 5.5c0-.8.7-1.5 1.5-1.5h5a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H4c-.8 0-1.5-.7-1.5-1.5z\"/><path d=\"M21.5 5.5c0-.8-.7-1.5-1.5-1.5h-5a3 3 0 0 0-3 3v13a2.5 2.5 0 0 1 2.5-2.5H20c.8 0 1.5-.7 1.5-1.5z\"/>", "reviews": "<path d=\"M3.5 12a8.5 8.5 0 0 1 14.6-5.9L20.5 8.5\"/><path d=\"M20.5 3.5v5h-5\"/><path d=\"M20.5 12a8.5 8.5 0 0 1-14.6 5.9L3.5 15.5\"/><path d=\"M3.5 20.5v-5h5\"/>", "applications": "<rect x=\"3\" y=\"7\" width=\"18\" height=\"13\" rx=\"2.5\"/><path d=\"M8.5 7V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V7M3 12.5h18\"/>", "clareza": "<path d=\"M12 21c-4.4-1.6-7-5-7-9.2C5 7 8.6 4 12 3c3.4 1 7 4 7 8.8 0 4.2-2.6 7.6-7 9.2Z\"/><path d=\"M12 21V10\"/>", "history": "<path d=\"M3.5 3.5v17h17\"/><path d=\"M8 16v-3M12.5 16V9M17 16V6\"/>"},NAV_SHORT={"dashboard": "Dia", "studies": "Estudos", "reviews": "Revisões", "applications": "Vagas", "clareza": "Clareza", "history": "Histórico"};const nav=document.createElement('nav');
   nav.className='main-nav';
@@ -37,7 +37,7 @@
     }catch{
       if($('noteSave'))$('noteSave').textContent='Falha ao salvar';
       $('saveStatus').textContent='Falha ao salvar. Exporte um backup.';
-      toast('Não foi possível salvar. Exporte um backup para preservar suas alterações.');
+      toast('Falha ao salvar. Exporte um backup.');
       return false
     }
   } function go(target){
@@ -45,7 +45,7 @@
     window.Applications?.setVisible(target==='applications');
     window.Clareza?.setVisible(target==='clareza');document.getElementById('clarezaPage')&&(document.getElementById('clarezaPage').hidden=target!=='clareza');
     document.body.classList.remove('focus-mode');
-    $('focusMode').textContent='Expandir foco ↗';
+    $('focusMode').textContent='Expandir';
     document.querySelector('main').hidden=target!=='dashboard';
     $('studyPage').hidden=target!=='studies';
     $('revisionPage').hidden=target!=='reviews';
@@ -164,7 +164,7 @@
       return
     }const notesHTML=(sid,tid)=>sorted(S.notes.filter(n=>n.subjectId===sid&&(n.topicId||'')===tid)).map(n=>`<div class="tree-note tree-line"><button class="tree-name ${noteId===n.id?'active':''}" data-note="${n.id}">↳ ${E(n.title||'Sem título')}</button>${actions('note',n.id)}</div>`).join('');
     const topicsHTML=(sid,parent='')=>sorted(S.topics.filter(t=>t.subjectId===sid&&(t.parentId||'')===parent)).map(t=>`<div class="tree-topic"><div class="tree-line"><button class="tree-name ${topicId===t.id?'active':''}" data-topic="${t.id}">${E(t.name)}</button>${actions('topic',t.id)}</div>${notesHTML(sid,t.id)}${topicsHTML(sid,t.id)}</div>`).join('');
-    $('studyTree').innerHTML=sorted(S.subjects).map(s=>`<div class="tree-subject"><div class="tree-line"><button class="tree-name ${subjectId===s.id?'active':''}" data-subject="${s.id}">▤ ${E(s.name)}</button>${actions('subject',s.id)}</div>${topicsHTML(s.id)}${notesHTML(s.id,'')}</div>`).join('')||'<p class="small" style="margin-top:20px">Crie sua primeira matéria. Depois organize tópicos e anotações.</p>'
+    $('studyTree').innerHTML=sorted(S.subjects).map(s=>`<div class="tree-subject"><div class="tree-line"><button class="tree-name ${subjectId===s.id?'active':''}" data-subject="${s.id}">${E(s.name)}</button>${actions('subject',s.id)}</div>${topicsHTML(s.id)}${notesHTML(s.id,'')}</div>`).join('')||''
   } $('addSubject').onclick=()=>editEntity('subject');
   $('studySearch').oninput=()=>{
     query=$('studySearch').value;
@@ -229,14 +229,14 @@
     renderTree();
     const n=note();
     if(!n){
-      $('studyEditor').innerHTML=subject()?`<div class="study-empty"><span class="eyebrow">${E(topicId?S.topics.find(t=>t.id===topicId)?.name:subject().name)}</span><h2>Um conceito por vez.</h2><p>Crie uma anotação ou escolha uma no caderno.</p>${relatedNotesHTML()}<div class="study-row" style="justify-content:center"><button class="primary" id="newNote">+ Anotação</button><button id="newTopic">+ Tópico</button><button id="subjectFocus">Iniciar foco</button></div></div>`:'<div class="study-empty"><h2>Seu caderno começa aqui.</h2><p>Uma matéria, um tópico e o primeiro pequeno passo.</p><button class="primary" id="firstSubject">Criar matéria</button></div>';
+      $('studyEditor').innerHTML=subject()?`<div class="study-empty"><span class="eyebrow">${E(topicId?S.topics.find(t=>t.id===topicId)?.name:subject().name)}</span><h2>Nenhuma anotação aberta</h2>${relatedNotesHTML()}<div class="study-row" style="justify-content:center"><button class="primary" id="newNote">+ Anotação</button><button id="newTopic">+ Tópico</button><button id="subjectFocus">Iniciar foco</button></div></div>`:'<div class="study-empty"><h2>Nenhuma matéria</h2><button class="primary" id="firstSubject">Criar matéria</button></div>';
       $('studyEditor').querySelectorAll('[data-related-note]').forEach(b=>b.onclick=()=>openNote(b.dataset.relatedNote));
       if($('newNote'))$('newNote').onclick=createNote;
       if($('newTopic'))$('newTopic').onclick=()=>editEntity('topic');
       if($('firstSubject'))$('firstSubject').onclick=()=>editEntity('subject');
       if($('subjectFocus'))$('subjectFocus').onclick=()=>beginStudy(subjectId,topicId);
       return
-    } $('studyEditor').innerHTML=`<div class="note-location"><select id="noteSubject" aria-label="Matéria da anotação">${subjectOptions(n.subjectId)}</select><select id="noteTopic" aria-label="Tópico da anotação">${topicOptions(n.subjectId,n.topicId)}</select><button class="quiet" id="newNote">+ Anotação</button><button class="quiet" id="newTopic">+ Tópico</button></div><input class="note-title" id="noteTitle" aria-label="Título da anotação" maxlength="200" value="${E(n.title)}"><div class="note-meta">Criada: ${new Date(n.createdAt).toLocaleString('pt-BR')} · Editada: <span id="noteEdited">${new Date(n.updatedAt).toLocaleString('pt-BR')}</span> · <span class="study-save" id="noteSave">Salvo automaticamente</span></div><input class="study-tags" id="noteTags" aria-label="Tags da anotação" placeholder="Tags opcionais, separadas por vírgula" value="${E(n.tags)}"><div class="note-tools"><div class="study-row"><button id="previewNote">${preview?'Editar Markdown':'Visualizar'}</button><button class="primary" id="noteFocus">Iniciar foco</button></div><button id="scheduleNote">${n.review?.enabled?'Desativar revisões':n.review?.nextDue?'Retomar revisões':'Concluir estudo e revisar'}</button></div><div class="small">${reviewLabel(n)}</div><div class="md-toolbar" ${preview?'hidden':''}><button data-md="heading">H2</button><button data-md="bold"><strong>B</strong></button><button data-md="italic"><em>I</em></button><button data-md="list">Lista</button><button data-md="check">☐ Lista</button><button data-md="code">&lt;/&gt; Código</button></div><textarea class="markdown-source" id="noteBody" aria-label="Conteúdo Markdown" spellcheck="false" placeholder="Escreva em Markdown. Use três crases para blocos de código." ${preview?'hidden':''}>${E(n.body)}</textarea><div class="markdown-preview" id="notePreview" ${preview?'':'hidden'}>${C.markdown(n.body)||'<p class="small">Sua prévia aparece aqui.</p>'}</div><details class="active-learning"><summary>Fixação · aprender ativamente</summary><label for="noteLearned">O que aprendi?</label><textarea id="noteLearned" placeholder="Registre os conceitos principais.">${E(n.learned)}</textarea><label for="noteExplanation">Explicando com minhas palavras</label><textarea id="noteExplanation" placeholder="Tente explicar sem consultar.">${E(n.explanation)}</textarea><h3 class="study-section-title">Perguntas de fixação</h3><div id="noteQuestions">${questionHTML(n)}</div><button id="addQuestion">+ Pergunta</button></details>`;
+    } $('studyEditor').innerHTML=`<div class="note-location"><select id="noteSubject" aria-label="Matéria da anotação">${subjectOptions(n.subjectId)}</select><select id="noteTopic" aria-label="Tópico da anotação">${topicOptions(n.subjectId,n.topicId)}</select><button class="quiet" id="newNote">+ Anotação</button><button class="quiet" id="newTopic">+ Tópico</button></div><input class="note-title" id="noteTitle" aria-label="Título da anotação" maxlength="200" value="${E(n.title)}"><div class="note-meta">Criada: ${new Date(n.createdAt).toLocaleString('pt-BR')} · Editada: <span id="noteEdited">${new Date(n.updatedAt).toLocaleString('pt-BR')}</span> · <span class="study-save" id="noteSave">Salvo automaticamente</span></div><input class="study-tags" id="noteTags" aria-label="Tags da anotação" placeholder="Tags opcionais, separadas por vírgula" value="${E(n.tags)}"><div class="note-tools"><div class="study-row"><button id="previewNote">${preview?'Editar Markdown':'Visualizar'}</button><button class="primary" id="noteFocus">Iniciar foco</button></div><button id="scheduleNote">${n.review?.enabled?'Desativar revisões':n.review?.nextDue?'Retomar revisões':'Concluir estudo e revisar'}</button></div><div class="small">${reviewLabel(n)}</div><div class="md-toolbar" ${preview?'hidden':''}><button data-md="heading">H2</button><button data-md="bold"><strong>B</strong></button><button data-md="italic"><em>I</em></button><button data-md="list">Lista</button><button data-md="check">☐ Lista</button><button data-md="code">&lt;/&gt; Código</button></div><textarea class="markdown-source" id="noteBody" aria-label="Conteúdo Markdown" spellcheck="false" placeholder="Escreva em Markdown. Use três crases para blocos de código." ${preview?'hidden':''}>${E(n.body)}</textarea><div class="markdown-preview" id="notePreview" ${preview?'':'hidden'}>${C.markdown(n.body)||'<p class="small">Vazio.</p>'}</div><details class="active-learning"><summary>Fixação</summary><label for="noteLearned">O que aprendi?</label><textarea id="noteLearned" >${E(n.learned)}</textarea><label for="noteExplanation">Com minhas palavras</label><textarea id="noteExplanation" >${E(n.explanation)}</textarea><h3 class="study-section-title">Perguntas de fixação</h3><div id="noteQuestions">${questionHTML(n)}</div><button id="addQuestion">+ Pergunta</button></details>`;
     $('newNote').onclick=createNote;
     $('newTopic').onclick=()=>editEntity('topic');
     for(const id of ['noteTitle','noteBody','noteTags','noteLearned','noteExplanation'])$(id).oninput=flushNote;
@@ -346,7 +346,7 @@
       E(q.question)
     }</strong><details><summary>Revelar resposta</summary><p style="white-space:pre-wrap">${
       E(q.answer)
-    }</p></details></div>`).join('')||'<p class="small">Sem perguntas. Tente explicar o conceito de memória.</p>'}</details><button data-open-review="${n.id}" style="margin-top:14px">Consultar anotação</button><div class="ratings"><button data-rate="no" data-note="${n.id}">🔴 Não lembrei</button><button data-rate="partial" data-note="${n.id}">🟡 Lembrei parcialmente</button><button data-rate="good" data-note="${n.id}">🟢 Lembrei bem</button></div></article>`).join(''):'<div class="card study-empty"><h2>Revisões em dia.</h2><p>Finalize uma anotação e ative as revisões. Elas aparecem aqui na data certa.</p></div>';
+    }</p></details></div>`).join('')||'<p class="small">Sem perguntas.</p>'}</details><button data-open-review="${n.id}" style="margin-top:14px">Consultar anotação</button><div class="ratings"><button data-rate="no" data-note="${n.id}">Não lembrei</button><button data-rate="partial" data-note="${n.id}">Parcialmente</button><button data-rate="good" data-note="${n.id}">Lembrei bem</button></div></article>`).join(''):'<div class="card study-empty"><h2>Nada para revisar hoje</h2></div>';
     $('upcomingReviews').innerHTML=S.notes.filter(n=>n.review?.enabled&&n.review.nextDue>today()).sort((a,b)=>a.review.nextDue.localeCompare(b.review.nextDue)).map(n=>`<p class="small">${n.review.nextDue} · ${E(n.title)}</p>`).join('')||'<p class="small">Nenhuma revisão futura agendada.</p>';
     const history=S.notes.flatMap(n=>(n.review?.history||[]).map(h=>({
       ...h,title:n.title
@@ -388,7 +388,7 @@
     const now=today(),start=new Date(now+'T12:00:00');
     start.setDate(start.getDate()-((start.getDay()+6)%7));
     const week=C.dateKey(start),sessions=S.sessions,t=sessions.filter(v=>v.date===now).reduce((n,v)=>n+v.minutes,0),w=sessions.filter(v=>v.date>=week&&v.date<=now).reduce((n,v)=>n+v.minutes,0),recent=[...new Set([...sessions].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date)).map(v=>v.subjectName))].slice(0,3);
-    dashboard.innerHTML=`<div class="heading"><h2>Meus Estudos</h2><button class="quiet" data-open-studies>Abrir estudos ↗</button></div><div class="study-stats"><div class="study-stat"><strong>${formatMinutes(t)}</strong><span>Estudados hoje</span></div><div class="study-stat"><strong>${formatMinutes(w)}</strong><span>Nesta semana</span></div><div class="study-stat"><strong>${pending().length}</strong><span>Revisões pendentes</span></div><div class="study-stat"><strong>${nextReviewLabel()}</strong><span>Próxima revisão</span></div></div><div class="study-row" style="justify-content:space-between"><span class="small">${recent.length?'Recentes: '+recent.map(E).join(' · '):'Uma matéria e um pequeno passo para começar.'}</span><button class="quiet" data-open-study-history>Ver histórico</button></div>`
+    dashboard.innerHTML=`<div class="heading"><h2>Estudos</h2><button class="quiet" data-open-studies>Abrir</button></div><div class="study-stats"><div class="study-stat"><strong>${formatMinutes(t)}</strong><span>Estudados hoje</span></div><div class="study-stat"><strong>${formatMinutes(w)}</strong><span>Nesta semana</span></div><div class="study-stat"><strong>${pending().length}</strong><span>Revisões pendentes</span></div><div class="study-stat"><strong>${nextReviewLabel()}</strong><span>Próxima revisão</span></div></div><div class="study-row" style="justify-content:space-between"><span class="small">${recent.length?'Recentes: '+recent.map(E).join(' · '):''}</span><button class="quiet" data-open-study-history>Ver histórico</button></div>`
   } dashboard.onclick=e=>{
     if(e.target.closest('[data-open-studies]'))go('studies');
     if(e.target.closest('[data-open-study-history]'))go('history')
@@ -423,7 +423,7 @@
       formatMinutes(v.minutes)
     }${
       v.noteTitle?' · '+E(v.noteTitle):''
-    }</p>`).join('')}</div>`:'<div class="card study-empty"><h2>Seu primeiro passo conta.</h2><p>Inicie o foco por uma matéria ou anotação e registre os minutos ao terminar.</p></div>'
+    }</p>`).join('')}</div>`:'<div class="card study-empty"><h2>Nenhuma sessão registrada</h2></div>'
   } // Tempo real: só trechos em execução nesta aba. IDs únicos impedem duplicação.
   function elapsed(){
     return (S.active?.elapsedMs||0)+(focusStartedAt!==null?Math.max(0,Date.now()-focusStartedAt):0)
@@ -525,7 +525,7 @@
     $('eventTopic').innerHTML=topicOptions(v?.subjectId||'',v?.topicId||'');
     $('eventStudyFields').hidden=$('eventType').value!=='study';
     $('eventSubject').required=$('eventType').value==='study';
-    $('eventStudyActions').innerHTML=v?.type==='study'?`<button type="button" id="eventOpenNotes">Abrir anotações</button><button type="button" id="eventStartFocus">Iniciar foco</button><button type="button" id="eventCompleteStudy">${v.done?'Sessão concluída ✓':'Marcar concluída'}</button>`:'';
+    $('eventStudyActions').innerHTML=v?.type==='study'?`<button type="button" id="eventOpenNotes">Abrir anotações</button><button type="button" id="eventStartFocus">Iniciar foco</button><button type="button" id="eventCompleteStudy">${v.done?'Sessão concluída':'Marcar concluída'}</button>`:'';
     if(v?.type==='study'){
       $('eventOpenNotes').onclick=()=>{
         const sid=$('eventSubject').value,tid=$('eventTopic').value;
@@ -554,8 +554,8 @@
           $('eventDone').checked=true;
           save();
           renderAgenda();
-          $('eventCompleteStudy').textContent='Sessão concluída ✓';
-          toast('Compromisso concluído. Registre os minutos pelo foco.')
+          $('eventCompleteStudy').textContent='Sessão concluída';
+          toast('Compromisso concluído.')
         }
       }
     }
@@ -596,7 +596,7 @@
     a.download=`stepbystep-backup-${today()}.json`;
     a.click();
     setTimeout(()=>URL.revokeObjectURL(url),2000);
-    toast('Backup completo exportado. Guarde o arquivo em um local seguro.')
+    toast('Backup exportado.')
   };
   $('importStudy').onclick=()=>$('studyFile').click();
   $('studyFile').onchange=async()=>{
@@ -606,7 +606,7 @@
     try{
       if(f.size>20*1024*1024)throw Error('O backup deve ter até 20 MB.');
       const incoming=C.validateBackup(JSON.parse(await f.text()));
-      modal('Importar backup?',`<p>Serão adicionados registros ausentes. Dias e identificadores que já existem neste navegador serão mantidos. A sessão em andamento e as playlists atuais serão preservadas.</p><p class="small">${incoming.study.subjects.length} matérias, ${incoming.study.notes.length} anotações e ${incoming.study.sessions.length} sessões no arquivo.</p>`,()=>{
+      modal('Importar backup?',`<p>Registros novos serão adicionados. Os existentes não mudam.</p><p class="small">${incoming.study.subjects.length} matérias, ${incoming.study.notes.length} anotações e ${incoming.study.sessions.length} sessões no arquivo.</p>`,()=>{
         if(running)pause();
         const merged=C.mergeBackup(db,incoming);
         localStorage.setItem(key,JSON.stringify(merged));
@@ -616,7 +616,7 @@
         subjectId=S.subjects[0]?.id||'';
         noteId='';
         topicId='';
-        persist('Backup importado, preservando os registros existentes.');
+        persist('Backup importado.');
         renderStudies();
         renderAgenda();
         renderHistory();
@@ -632,5 +632,5 @@
   };
   renderDashboard();
   updateFocusContext();
-  if(S.active)toast('Há uma sessão de estudo pausada. Retome pelo timer ou registre o tempo.');
+  if(S.active)toast('Sessão de estudo pausada.');
 })();
