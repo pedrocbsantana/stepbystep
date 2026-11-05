@@ -135,28 +135,28 @@
     </section>
   </div>
 
-  <!-- Passo 04: fechar o dia -->
-  <div class="grid-2 row-gap">
-    <section class="card" aria-labelledby="reviewTitle">
-      <div class="heading"><h2 id="reviewTitle"><span class="step">04</span>Fechar o dia</h2><span class="small" id="reviewStatus">No seu tempo</span></div>
-      <label class="caption" for="wentWell">O que funcionou hoje?</label>
-      <textarea id="wentWell" placeholder="Mesmo que tenha sido só começar."></textarea>
-      <label class="caption" for="nextStep">Qual é o primeiro passo de amanhã?</label>
-      <textarea id="nextStep" placeholder="Deixe um passo fácil de retomar."></textarea>
-      <div class="review-foot"><label class="small">Como foi? <select id="feeling"><option value="">Escolher</option><option>Difícil</option><option>Razoável</option><option>Bom</option></select></label><button class="primary" id="saveReview">Salvar revisão</button></div>
-    </section>
-    <section class="card daily-journal" aria-labelledby="journalTitle">
-      <div class="heading"><h2 id="journalTitle">Diário do dia</h2><span class="small" id="journalDate"></span></div>
-      <p class="small">Seu espaço para colocar para fora. Escreva o que quiser, no seu ritmo.</p>
-      <label for="dailyJournal" class="sr-only">Escrita livre do dia</label>
-      <textarea id="dailyJournal" placeholder="Pode começar de qualquer jeito…" spellcheck="true"></textarea>
-      <div class="journal-footer"><span class="small" id="journalSave" role="status">Salvo automaticamente neste navegador.</span><span class="small" id="journalCount">0 caracteres</span></div>
-    </section>
-  </div>
+  <!-- Passo 04: fechar o dia (revisão + escrita livre) -->
+  <section class="card close-day row-gap" aria-labelledby="reviewTitle">
+    <div class="heading"><h2 id="reviewTitle"><span class="step">04</span>Fechar o dia</h2><span class="small" id="reviewStatus">No seu tempo</span></div>
+    <div class="close-day-cols">
+      <div class="close-day-review">
+        <label class="caption" for="wentWell">O que funcionou hoje?</label>
+        <textarea id="wentWell" placeholder="Mesmo que tenha sido só começar."></textarea>
+        <label class="caption" for="nextStep">Qual é o primeiro passo de amanhã?</label>
+        <textarea id="nextStep" placeholder="Deixe um passo fácil de retomar. Ele aparece amanhã como sugestão."></textarea>
+        <div class="review-foot"><label class="small">Como foi? <select id="feeling"><option value="">Escolher</option><option>Difícil</option><option>Razoável</option><option>Bom</option></select></label><button class="primary" id="saveReview">Salvar revisão</button></div>
+      </div>
+      <div class="daily-journal">
+        <div class="journal-head"><label for="dailyJournal" class="caption" id="journalTitle">Escrita livre</label><span class="small" id="journalDate"></span></div>
+        <textarea id="dailyJournal" placeholder="Seu espaço para colocar para fora. Pode começar de qualquer jeito…" spellcheck="true"></textarea>
+        <div class="journal-footer"><span class="small" id="journalSave" role="status">Salvo automaticamente neste navegador.</span><span class="small" id="journalCount">0 caracteres</span></div>
+      </div>
+    </div>
+  </section>
 
   <!-- Histórico de dias -->
   <details class="card history row-gap" id="historyPanel">
-    <summary><div><h2>Dias anteriores</h2><span class="small" id="historySummary">Seu caminho, um dia por vez.</span></div></summary>
+    <summary><div><h2>Meus dias</h2><span class="small" id="historySummary">Seu caminho, um dia por vez.</span></div></summary>
     <p class="small">Abra um dia para ver seu plano, tarefas, distrações e revisão. Os registros são deste navegador.</p>
     <div class="history-wrap"><table><thead><tr><th scope="col">Dia</th><th scope="col">Blocos</th><th scope="col">Agenda</th><th scope="col">Foco</th><th scope="col">Checklist</th><th scope="col">Revisão</th><th scope="col"><span class="sr-only">Ações</span></th></tr></thead><tbody id="historyRows"></tbody></table></div>
     <div id="deletedNotice" class="deleted-notice" role="status" hidden><span id="deletedMessage"></span><button id="undoDeleteDay">Desfazer exclusão</button></div>
@@ -194,8 +194,19 @@
     <div class="segmented" role="group" aria-label="Tema"><button type="button" data-theme-choice="dark">Escuro</button><button type="button" data-theme-choice="light">Claro</button><button type="button" data-theme-choice="system">Sistema</button></div>
   </div>
   <div class="settings-section">
+    <h3>Seções</h3>
+    <p class="small">Esconda o que não estiver usando agora. Nada é apagado.</p>
+    <div class="section-toggles" id="sectionToggles">
+      <label><input type="checkbox" data-section="agenda"> Agenda no Meu dia</label>
+      <label><input type="checkbox" data-section="studies"> Estudos, Revisões e Histórico</label>
+      <label><input type="checkbox" data-section="applications"> Candidaturas</label>
+      <label><input type="checkbox" data-section="clareza"> Clareza</label>
+    </div>
+  </div>
+  <div class="settings-section">
     <h3>Backup</h3>
     <p class="small">Seus dados ficam só neste navegador. O backup inclui dias, agenda, estudos, revisões, candidaturas e playlists. Guarde o arquivo em local seguro.</p>
+    <p class="small" id="lastBackupInfo"></p>
     <div class="row"><button type="button" class="primary" id="settingsExport">Exportar backup</button><button type="button" id="settingsImport">Importar backup</button></div>
   </div>
 </dialog>

@@ -593,3 +593,14 @@ body.has-floating-focus footer{padding-bottom:96px}
 .nudge{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;margin:-8px 0 20px;border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--ink);border-radius:var(--radius);font-size:var(--fs-sm)}
 .nudge-actions{display:flex;gap:8px;flex-wrap:wrap}
 .nudge-actions button{padding:6px 12px;font-size:var(--fs-sm)}
+
+/* ---------- 19. Fechar o dia + escrita livre, seções ---------- */
+.close-day-cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:28px}
+.close-day .daily-journal{display:flex;flex-direction:column}
+.journal-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.journal-head .caption{margin-top:10px}
+.close-day .daily-journal textarea{flex:1;min-height:250px;margin:6px 0 10px}
+.grid-2:has(> [hidden]) > :not([hidden]){grid-column:1/-1}
+.section-toggles{display:grid;gap:10px;margin-top:12px}
+.section-toggles label{display:flex;gap:10px;align-items:center;font-size:var(--fs-sm);cursor:pointer}
+@media (max-width:900px){.close-day-cols{grid-template-columns:minmax(0,1fr);gap:8px}}

@@ -9,7 +9,7 @@
   const nav=document.createElement('nav');
   nav.className='main-nav';
   nav.setAttribute('aria-label','Navegação principal');
-  nav.innerHTML=[['dashboard','Meu dia'],['studies','Estudos'],['reviews','Revisões'],['applications','Candidaturas'],['history','Histórico de estudos']].map(([id,label])=>`<button data-study-view="${id}" ${id==='dashboard'?'aria-current="page"':''}>${label}</button>`).join('');
+  nav.innerHTML=[['dashboard','Meu dia'],['studies','Estudos'],['reviews','Revisões'],['applications','Candidaturas'],['history','Histórico']].map(([id,label])=>`<button data-study-view="${id}" ${id==='dashboard'?'aria-current="page"':''}>${label}</button>`).join('');
   document.querySelector('header .tag').replaceWith(nav);
   const dashboard=document.createElement('section');
   dashboard.id='studyDashboard';
@@ -375,11 +375,19 @@
   };
   function formatMinutes(m){
     return m<60?`${Math.round(m*10)/10} min`:`${Math.floor(m/60)}h ${Math.round(m%60)}min`
-  } function renderDashboard(){
+  } function nextReviewLabel(){
+    const next=S.notes.filter(n=>n.review?.enabled&&n.review.nextDue).map(n=>n.review.nextDue).sort()[0];
+    if(!next)return '—';
+    const t=today();
+    if(next<=t)return 'Hoje';
+    if(next===C.addDays(t,1))return 'Amanhã';
+    return new Date(next+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  }
+  function renderDashboard(){
     const now=today(),start=new Date(now+'T12:00:00');
     start.setDate(start.getDate()-((start.getDay()+6)%7));
     const week=C.dateKey(start),sessions=S.sessions,t=sessions.filter(v=>v.date===now).reduce((n,v)=>n+v.minutes,0),w=sessions.filter(v=>v.date>=week&&v.date<=now).reduce((n,v)=>n+v.minutes,0),recent=[...new Set([...sessions].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date)).map(v=>v.subjectName))].slice(0,3);
-    dashboard.innerHTML=`<div class="heading"><h2>Meus Estudos</h2><button class="quiet" data-open-studies>Abrir estudos ↗</button></div><div class="study-stats"><div class="study-stat"><strong>${formatMinutes(t)}</strong><span>Estudados hoje</span></div><div class="study-stat"><strong>${formatMinutes(w)}</strong><span>Nesta semana</span></div><div class="study-stat"><strong>${pending().length}</strong><span>Revisões pendentes</span></div><div class="study-stat"><strong>${sessions.length}</strong><span>Sessões registradas</span></div></div><div class="study-row" style="justify-content:space-between"><span class="small">${recent.length?'Recentes: '+recent.map(E).join(' · '):'Uma matéria e um pequeno passo para começar.'}</span><button class="quiet" data-open-study-history>Ver histórico</button></div>`
+    dashboard.innerHTML=`<div class="heading"><h2>Meus Estudos</h2><button class="quiet" data-open-studies>Abrir estudos ↗</button></div><div class="study-stats"><div class="study-stat"><strong>${formatMinutes(t)}</strong><span>Estudados hoje</span></div><div class="study-stat"><strong>${formatMinutes(w)}</strong><span>Nesta semana</span></div><div class="study-stat"><strong>${pending().length}</strong><span>Revisões pendentes</span></div><div class="study-stat"><strong>${nextReviewLabel()}</strong><span>Próxima revisão</span></div></div><div class="study-row" style="justify-content:space-between"><span class="small">${recent.length?'Recentes: '+recent.map(E).join(' · '):'Uma matéria e um pequeno passo para começar.'}</span><button class="quiet" data-open-study-history>Ver histórico</button></div>`
   } dashboard.onclick=e=>{
     if(e.target.closest('[data-open-studies]'))go('studies');
     if(e.target.closest('[data-open-study-history]'))go('history')
