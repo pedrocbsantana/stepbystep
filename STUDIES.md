@@ -2,7 +2,7 @@
 
 ## Arquitetura
 
-Aplicativo estático sem build, backend ou novas dependências. `dist/index.html` mantém o dashboard, agenda, timer e integração de música anteriores. `study-core.js` contém regras puras; `studies.js` contém a interface e integrações; `studies.css` reutiliza as variáveis do tema existente. `window.StudyBridge` conecta os eventos de início, pausa, conclusão e formulário da agenda sem substituir os handlers existentes.
+Aplicativo estático sem build, backend ou novas dependências. `dist/index.html` mantém o dashboard, agenda, timer e integração de música anteriores. `study-core.js` contém regras puras; `studies.js` contém a interface e integrações. Todo o visual fica em `styles.css`. `window.StudyBridge` conecta os eventos de início, pausa, conclusão e formulário da agenda sem substituir os handlers existentes.
 
 ## Persistência e compatibilidade
 
@@ -34,7 +34,7 @@ Verificação no navegador: criação de matéria/tópico/notas; edição e alte
 
 ## Candidaturas
 
-`applications-core.js` contém validação de registros, status e links; `applications.js` adiciona cadastro, edição, exclusão confirmada, histórico de status, busca sem acentos, filtros, ordenação e acompanhamentos. `applications.css` mantém o tema existente. Os registros ficam em `db.applications`, na mesma chave de armazenamento. O backup completo inclui candidaturas; importação mescla por ID, preservando registros locais em conflito. Backups anteriores, sem candidaturas, permanecem compatíveis. Não envia mensagens, não busca vagas automaticamente e não gera notificações externas.
+`applications-core.js` contém validação de registros, status e links; `applications.js` adiciona cadastro, edição, exclusão confirmada, histórico de status, busca sem acentos, filtros, ordenação e acompanhamentos. Os registros ficam em `db.applications`, na mesma chave de armazenamento. O backup completo inclui candidaturas; importação mescla por ID, preservando registros locais em conflito. Backups anteriores, sem candidaturas, permanecem compatíveis. Não envia mensagens, não busca vagas automaticamente e não gera notificações externas.
 
 `node tests/applications.test.cjs` verifica validação, rejeição de URLs inseguras, busca sem acentos, status ativos e mesclagem de backup sem duplicação.
 
@@ -49,3 +49,13 @@ O encerramento real do timer chama um sino sintetizado por Web Audio (duas batid
 O Pomodoro flutuante pode ser minimizado pelo botão no cabeçalho e expandido pelo controle ao lado do tempo. O modo compacto usa o mesmo relógio, mantém timer e player montados e não chama pausa de áudio; o conteúdo recolhido fica inerte para navegação por teclado. A preferência fica em `db.focusPrefs.minimized` e é mantida ao trocar de aba. O dashboard sempre mostra o cartão completo.
 
 O Diário do dia fica no final de Meu dia. `daily-journal.js` salva escrita livre em `db.days[data].journal` a cada edição, restaura na navegação entre datas e participa do backup completo já existente. A exclusão de um dia também inclui seu diário, com o mesmo mecanismo de desfazer. Os dados continuam somente neste navegador.
+
+## Sistema visual (redesign de novembro/2026)
+
+`styles.css` é o único arquivo de estilos. As cores, fontes e espaçamentos ficam como variáveis (tokens) no topo do arquivo. O tema escuro é o padrão; `:root[data-theme="light"]` troca os tokens para o tema claro. Nenhuma cor deve ser escrita fora dos tokens.
+
+`settings.js` cuida do botão de tema (☾/☀) e do diálogo ⚙ Configurações, com tema Escuro/Claro/Sistema e exportar/importar backup a partir de qualquer aba. A exportação e a importação continuam sendo as de `studies.js`. A escolha de tema fica em `localStorage['stepbystep-theme']`, fora do backup, porque é uma preferência de cada aparelho. A visão da agenda (Dia/Semana) fica em `localStorage['stepbystep-agenda-view']`.
+
+Ordem do Meu dia: 01 Plano e 02 Foco lado a lado; 03 Durante o dia (checklist + distrações); Agenda (abre em Dia, semana começa na segunda); Meus Estudos + Consistência; 04 Fechar o dia + Diário; Dias anteriores. A navegação de datas fica só no topo. O Pomodoro flutuante abre minimizado nas outras abas.
+
+Os arquivos anteriores ao redesign estão em `dist-backup-antes-redesign/`.

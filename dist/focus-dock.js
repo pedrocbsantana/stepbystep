@@ -20,7 +20,7 @@
   card.append(bell);
   db.focusPrefs??={bell:true};
   $('focusBellEnabled').checked=db.focusPrefs.bell!==false;
-  let view='dashboard',position=null,drag=null,audio=null,minimized=!!db.focusPrefs.minimized;
+  let view='dashboard',position=null,drag=null,audio=null,minimized=db.focusPrefs.minimized!==false;
   function refreshCompact(){
     const compact=view!=='dashboard'&&minimized;
     dock.classList.toggle('minimized',compact);
