@@ -34,22 +34,26 @@
     </div>
   </div>
 
+  <div class="nudge" id="backupNudge" role="status" hidden><span id="backupNudgeText"></span><span class="nudge-actions"><button type="button" class="primary" id="backupNow">Fazer backup agora</button><button type="button" id="backupLater">Lembrar depois</button></span></div>
+
   <!-- Passos 01 e 02: planejar e focar -->
   <div class="layout">
     <section class="card" id="plan" aria-labelledby="planTitle">
       <div class="heading"><h2 id="planTitle"><span class="step">01</span>Seu plano do dia</h2><span class="pill" id="total"></span></div>
-      <p class="small">Uma sugestão de 2h30. Ajuste os blocos ao seu dia, sem horários fixos.</p>
+      <p class="small">Ajuste os blocos ao seu dia, sem horários fixos.</p>
       <p class="reorder-hint" id="reorderHint">Arraste pela alça ⠿ para ordenar. Com o teclado, use ↑ e ↓ na alça.</p>
       <div id="blocks"></div>
       <span id="reorderStatus" class="sr-only" aria-live="polite"></span>
       <div class="progress"><div id="progress"></div></div>
-      <div class="heading" style="margin:0"><span class="small" id="completed"></span><button class="quiet" id="addBlock">+ Adicionar bloco</button></div>
+      <div class="heading" style="margin:0"><span class="small" id="completed"></span><span class="plan-actions"><button class="quiet" id="savePlanTemplate" title="Os próximos dias começam com estes blocos">Salvar como modelo</button><button class="quiet" id="addBlock">+ Adicionar bloco</button></span></div>
+      <p class="small plan-status" id="planStatus" role="status"></p>
     </section>
 
     <section class="card focus-card" aria-labelledby="focusTitle">
       <div class="heading"><h2 id="focusTitle"><span class="step">02</span>Uma tarefa, agora</h2><button class="quiet" id="focusMode">Expandir foco ↗</button></div>
       <label for="task" class="small">Qual é o menor próximo passo?</label>
       <input id="task" type="text" placeholder="Ex.: criar uma CDS view simples">
+      <div class="task-suggestion" id="taskSuggestion" hidden><span class="small">Você deixou para hoje:</span> <strong id="taskSuggestionText"></strong> <button type="button" class="chip-button" id="useSuggestion">Usar</button></div>
       <div class="timer" id="clock" role="timer">10:00</div>
       <div class="timer-note" id="timerNote" aria-live="polite">Só estes minutos. Você pode começar pequeno.</div>
       <div class="actions"><button class="primary" id="start">▶ Começar</button><button id="reset" aria-label="Reiniciar timer">↻ Reiniciar</button></div>
@@ -86,6 +90,7 @@
         <h3>Checklist essencial <span class="small" id="checkCount"></span></h3>
         <p class="small">Passos pequenos e concretos para este dia.</p>
         <form class="entry" id="checkForm"><input id="checkInput" placeholder="Adicionar um pequeno passo…" aria-label="Nova tarefa do checklist" maxlength="250"><button aria-label="Adicionar tarefa">+</button></form>
+        <button type="button" class="chip-button carry" id="carryChecks" hidden></button>
         <ul class="items" id="checklist"></ul>
       </div>
       <div class="capture-col">
@@ -164,7 +169,7 @@
 <dialog id="deleteDayDialog" aria-labelledby="deleteDayTitle">
   <h2 id="deleteDayTitle">Apagar dia?</h2>
   <p class="delete-summary" id="deleteDaySummary"></p>
-  <p class="small" id="deleteDayHint">Os registros dos outros dias e suas playlists serão mantidos. Você poderá desfazer esta exclusão pelo histórico.</p>
+  <p class="small" id="deleteDayHint">Os registros dos outros dias e suas playlists serão mantidos. Você pode desfazer por até 30 dias, em Meus dias.</p>
   <div class="delete-actions"><button id="cancelDeleteDay">Cancelar</button><button class="danger" id="confirmDeleteDay">Apagar dia</button></div>
 </dialog>
 

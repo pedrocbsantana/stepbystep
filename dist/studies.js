@@ -575,6 +575,9 @@
   $('exportStudy').onclick=()=>{
     if(running)pause();
     else onPause();
+    db.meta??={};db.meta.lastBackupAt=Date.now();delete db.meta.backupSnoozeUntil;
+    try{localStorage.setItem(key,JSON.stringify(db))}catch{}
+    window.renderBackupNudge?.();
     const payload={
       format:'stepbystep-backup',version:1,exportedAt:new Date().toISOString(),data:db
     },blob=new Blob([JSON.stringify(payload,null,2)],{

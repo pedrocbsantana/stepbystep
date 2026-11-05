@@ -17,14 +17,24 @@ let date = localDate(new Date()),
   end = 0,
   remaining = 600,
   running = false;
+// Modelo de plano: cada dia novo começa com estes blocos. Editável em "Salvar como modelo".
+const DEFAULT_PLAN = [
+  ["ABAP / RAP", 60],
+  ["Candidaturas", 30],
+  ["Landing pages", 30],
+  ["CRM", 20],
+  ["Pausa", 10],
+].map(([name, min]) => ({ name, min }));
+if (!Array.isArray(db.planTemplate) || !db.planTemplate.length)
+  db.planTemplate = DEFAULT_PLAN;
+db.meta ??= {};
+// Lixeira: dias apagados ficam disponíveis para desfazer por 30 dias.
+const TRASH_DAYS = 30;
+for (const [k, v] of Object.entries(db.deletedDays || {}))
+  if (!v?.deletedAt || Date.now() - v.deletedAt > TRASH_DAYS * 864e5)
+    delete db.deletedDays[k];
 const defaults = () => ({
-  blocks: [
-    ["ABAP / RAP", 60],
-    ["Candidaturas", 30],
-    ["Landing pages", 30],
-    ["CRM", 20],
-    ["Pausa", 10],
-  ].map(([name, min]) => ({ name, min, done: false })),
+  blocks: db.planTemplate.map(({ name, min }) => ({ name, min, done: false })),
   task: "",
   timerMinutes: 10,
   rounds: 0,
@@ -36,7 +46,32 @@ const defaults = () => ({
   reviewed: false,
 });
 let day;
+// Um dia só "existe" no histórico quando tem algum registro de verdade.
+function isEmptyDay(v) {
+  return (
+    !v ||
+    !(
+      v.planEdited ||
+      v.rounds > 0 ||
+      v.blocks?.some((b) => b.done) ||
+      v.checks?.length ||
+      v.distractions?.length ||
+      v.appointments?.length ||
+      v.wentWell ||
+      v.nextStep ||
+      v.feeling ||
+      v.reviewed ||
+      v.journal ||
+      v.task
+    )
+  );
+}
+function pruneEmptyDays() {
+  for (const [k, v] of Object.entries(db.days))
+    if (k !== date && isEmptyDay(v)) delete db.days[k];
+}
 function save() {
+  pruneEmptyDays();
   renderHistory();
   try {
     localStorage.setItem(key, JSON.stringify(db));
@@ -47,6 +82,26 @@ function save() {
       "Não foi possível salvar. Verifique o armazenamento do navegador.";
   }
 }
+// Lembrete gentil de backup: os dados só existem neste navegador.
+function renderBackupNudge() {
+  const last = db.meta.lastBackupAt || 0,
+    days = Object.values(db.days).filter((v) => !isEmptyDay(v)).length,
+    stale = Date.now() - last > 7 * 864e5,
+    snoozed = (db.meta.backupSnoozeUntil || 0) > Date.now();
+  const show = days >= 3 && stale && !snoozed;
+  $("backupNudge").hidden = !show;
+  if (show)
+    $("backupNudgeText").textContent = last
+      ? `Seu último backup foi há ${Math.floor((Date.now() - last) / 864e5)} dias. Seus dados ficam só neste navegador.`
+      : "Você ainda não fez nenhum backup. Seus dados ficam só neste navegador.";
+}
+window.renderBackupNudge = renderBackupNudge;
+$("backupNow").onclick = () => $("exportStudy").click();
+$("backupLater").onclick = () => {
+  db.meta.backupSnoozeUntil = Date.now() + 3 * 864e5;
+  save();
+  renderBackupNudge();
+};
 function escapeHTML(t) {
   return String(t).replace(
     /[&<>"']/g,
@@ -84,7 +139,30 @@ function load() {
   scrollAgenda();
   window.DailyJournal?.load();
 }
+// O "primeiro passo de amanhã" do último dia anterior vira sugestão para a tarefa.
+function renderSuggestion() {
+  const prev = Object.keys(db.days)
+      .filter((k) => k < date && db.days[k].nextStep?.trim())
+      .sort()
+      .pop(),
+    text = prev ? db.days[prev].nextStep.trim() : "";
+  const show = !!text && !day.task?.trim() && !running;
+  $("taskSuggestion").hidden = !show;
+  if (show) {
+    $("taskSuggestionText").textContent = text;
+    $("taskSuggestion").dataset.text = text;
+  }
+}
+$("useSuggestion").onclick = () => {
+  day.task = $("taskSuggestion").dataset.text || "";
+  $("task").value = day.task;
+  save();
+  renderSuggestion();
+  $("task").focus();
+};
 function render() {
+  renderSuggestion();
+  renderBackupNudge();
   renderAgenda();
   renderHistory();
   renderBlocks();
@@ -115,6 +193,8 @@ $("blocks").addEventListener("change", (e) => {
   let t = e.target;
   if (t.dataset.done !== undefined) day.blocks[t.dataset.done].done = t.checked;
   if (t.dataset.name !== undefined) day.blocks[t.dataset.name].name = t.value;
+  if (t.dataset.name !== undefined || t.dataset.min !== undefined)
+    day.planEdited = true;
   if (t.dataset.min !== undefined)
     day.blocks[t.dataset.min].min = Math.max(
       1,
@@ -127,13 +207,21 @@ $("blocks").addEventListener("change", (e) => {
 $("blocks").addEventListener("click", (e) => {
   if (e.target.dataset.remove !== undefined) {
     day.blocks.splice(+e.target.dataset.remove, 1);
+    day.planEdited = true;
     save();
     renderBlocks();
     renderWeek();
   }
 });
+$("savePlanTemplate").onclick = () => {
+  db.planTemplate = day.blocks.map(({ name, min }) => ({ name, min }));
+  save();
+  $("planStatus").textContent = "Modelo salvo. Os próximos dias começam com estes blocos.";
+  setTimeout(() => ($("planStatus").textContent = ""), 4000);
+};
 $("addBlock").onclick = () => {
   day.blocks.push({ name: "Novo bloco", min: 10, done: false });
+  day.planEdited = true;
   save();
   renderBlocks();
 };
@@ -141,7 +229,7 @@ function renderLists() {
   $("checklist").innerHTML = day.checks
     .map(
       (c, i) =>
-        `<li class="${c.done ? "done" : ""}"><input type="checkbox" data-check="${i}" ${c.done ? "checked" : ""} aria-label="Concluir ${escapeHTML(c.text)}"><span>${escapeHTML(c.text)}</span><button class="remove" data-delcheck="${i}" aria-label="Remover tarefa">×</button></li>`,
+        `<li class="${c.done ? "done" : ""} ${c.movedTo ? "moved" : ""}"><input type="checkbox" data-check="${i}" ${c.done ? "checked" : ""} ${c.movedTo ? "disabled" : ""} aria-label="Concluir ${escapeHTML(c.text)}"><span>${escapeHTML(c.text)}${c.movedTo ? ` <small>→ levada para ${shortDate(c.movedTo)}</small>` : ""}</span><button class="remove" data-delcheck="${i}" aria-label="Remover tarefa">×</button></li>`,
     )
     .join("");
   $("checkCount").textContent =
@@ -149,11 +237,62 @@ function renderLists() {
   $("distractions").innerHTML = day.distractions
     .map(
       (t, i) =>
-        `<li><span>${escapeHTML(t)}</span><button class="remove" data-deldis="${i}" aria-label="Remover distração">×</button></li>`,
+        `<li><span>${escapeHTML(t)}</span><button type="button" class="chip-button" data-distask="${i}" title="Virar tarefa no checklist de amanhã">→ amanhã</button><button class="remove" data-deldis="${i}" aria-label="Remover distração">×</button></li>`,
     )
     .join("");
   $("emptyDistractions").hidden = day.distractions.length > 0;
+  renderCarry();
 }
+const shortDate = (d) =>
+  new Date(d + "T12:00:00").toLocaleDateString("pt-BR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+  });
+function addDaysKey(d, n) {
+  const v = new Date(d + "T12:00:00");
+  v.setDate(v.getDate() + n);
+  return localDate(v);
+}
+// Pendências: itens não feitos do último dia anterior com checklist.
+function carrySource() {
+  const prev = Object.keys(db.days)
+    .filter((k) => k < date && db.days[k].checks?.length)
+    .sort()
+    .pop();
+  if (!prev) return null;
+  const open = db.days[prev].checks.filter((c) => !c.done && !c.movedTo);
+  return open.length ? { date: prev, open } : null;
+}
+function renderCarry() {
+  const src = carrySource();
+  $("carryChecks").hidden = !src;
+  if (src)
+    $("carryChecks").textContent =
+      `↩ Trazer ${src.open.length} pendência${src.open.length === 1 ? "" : "s"} de ${shortDate(src.date)}`;
+}
+$("carryChecks").onclick = () => {
+  const src = carrySource();
+  if (!src) return;
+  src.open.forEach((c) => {
+    day.checks.push({ text: c.text, done: false, from: src.date });
+    c.movedTo = date;
+  });
+  save();
+  renderLists();
+};
+// Distração vira tarefa no checklist do dia seguinte.
+$("distractions").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-distask]");
+  if (!b) return;
+  const [text] = day.distractions.splice(+b.dataset.distask, 1),
+    next = addDaysKey(date, 1);
+  db.days[next] ??= defaults();
+  db.days[next].checks.push({ text, done: false, from: date });
+  save();
+  renderLists();
+  $("saveStatus").textContent = `“${text}” foi para o checklist de ${shortDate(next)}.`;
+});
 $("checkForm").onsubmit = (e) => {
   e.preventDefault();
   let t = $("checkInput").value.trim();
@@ -298,6 +437,7 @@ $("focusMode").onclick = () => {
   $(k).addEventListener("input", () => {
     day[k] = $(k).value;
     if (k !== "task") day.reviewed = false;
+    if (k === "task") renderSuggestion();
     save();
     $("reviewStatus").textContent = day.reviewed
       ? "Revisão salva ✓"
@@ -315,6 +455,7 @@ function selectDay(value) {
   date = value;
   weekOffset = 0;
   load();
+  save();
   $("timerNote").textContent = "Um novo passo, no seu ritmo.";
 }
 function shiftDay(amount) {
@@ -334,7 +475,10 @@ $("historyRows").onclick = (e) => {
 };
 function renderHistory() {
   renderDeletedNotice();
-  const dates = Object.keys(db.days).sort().reverse();
+  const dates = Object.keys(db.days)
+    .filter((d) => !isEmptyDay(db.days[d]))
+    .sort()
+    .reverse();
   $("historySummary").textContent =
     `${dates.length} dia${dates.length === 1 ? "" : "s"} registrado${dates.length === 1 ? "" : "s"} · selecione para consultar`;
   $("historyEmpty").hidden = dates.length > 0;
@@ -906,7 +1050,7 @@ function requestDeleteDay(value) {
   $("deleteDaySummary").textContent =
     `Isso remove todos os registros deste dia: ${v.blocks.length} blocos, ${v.checks.length} tarefas, ${v.distractions.length} distrações, ${(v.appointments || []).length} compromissos, rodadas de foco e revisão.`;
   $("deleteDayHint").textContent =
-    "Os outros dias e suas playlists serão mantidos. Você poderá desfazer esta exclusão pelo histórico.";
+    "Os outros dias e suas playlists serão mantidos. Você pode desfazer por até 30 dias, em Meus dias.";
   $("confirmDeleteDay").textContent = "Apagar dia";
   $("deleteDayDialog").showModal();
 }
@@ -986,6 +1130,7 @@ function endBlockDrag(commit) {
       (row) => Number(row.dataset.blockIndex),
     );
     day.blocks = order.map((i) => day.blocks[i]);
+    day.planEdited = true;
     save();
     renderBlocks();
     const index = order.indexOf(drag.index);
@@ -1056,6 +1201,7 @@ $("blocks").addEventListener("keydown", (e) => {
           : from + (e.key === "ArrowUp" ? -1 : 1);
   if (to < 0 || to >= day.blocks.length || to === from) return;
   const [block] = day.blocks.splice(from, 1);
+  day.planEdited = true;
   day.blocks.splice(to, 0, block);
   save();
   renderBlocks();

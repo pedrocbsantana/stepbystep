@@ -576,3 +576,20 @@ body.has-floating-focus footer{padding-bottom:96px}
   .dot{width:32px;height:32px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- 18. Ajudas do dia (modelo, sugestões, pendências, backup) ---------- */
+.plan-actions{display:flex;gap:14px;flex-wrap:wrap}
+.plan-status:empty{display:none}
+.plan-status{color:var(--accent);margin-top:8px}
+.chip-button{border:1px solid var(--accent-line);background:var(--accent-soft);color:var(--ink);border-radius:999px;padding:3px 10px;font-size:var(--fs-xs);white-space:nowrap}
+.chip-button:hover{background:var(--surface-3)}
+.task-suggestion{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:2px 0 6px;font-size:var(--fs-sm)}
+.task-suggestion strong{font-weight:600;overflow-wrap:anywhere}
+.carry{margin-top:12px}
+.items li.moved span{color:var(--subtle);text-decoration:none}
+.items li small{font-size:var(--fs-xs);color:var(--subtle)}
+.items li .chip-button{opacity:.75}
+.items li:hover .chip-button{opacity:1}
+.nudge{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;margin:-8px 0 20px;border:1px solid var(--warn-line);background:var(--warn-soft);color:var(--ink);border-radius:var(--radius);font-size:var(--fs-sm)}
+.nudge-actions{display:flex;gap:8px;flex-wrap:wrap}
+.nudge-actions button{padding:6px 12px;font-size:var(--fs-sm)}
