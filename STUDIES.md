@@ -59,3 +59,27 @@ O Diário do dia fica no final de Meu dia. `daily-journal.js` salva escrita livr
 Ordem do Meu dia: 01 Plano e 02 Foco lado a lado; 03 Durante o dia (checklist + distrações); Agenda (abre em Dia, semana começa na segunda); Meus Estudos + Consistência; 04 Fechar o dia + Diário; Dias anteriores. A navegação de datas fica só no topo. O Pomodoro flutuante abre minimizado nas outras abas.
 
 Os arquivos anteriores ao redesign estão em `dist-backup-antes-redesign/`.
+
+## Lógica do dia (novembro/2026)
+
+O script do Meu dia fica em `app.js`. Um dia só entra no histórico quando tem algum registro (`isEmptyDay`): bloco concluído, plano editado (`planEdited`), rodada, checklist, distração, compromisso, revisão, escrita ou tarefa. Dias vazios de outras datas são removidos ao salvar.
+
+- `db.planTemplate` é o modelo de blocos dos dias novos ("Salvar como modelo").
+- "Trazer pendências" copia os itens abertos do último dia anterior com checklist e marca os originais com `movedTo`.
+- O `nextStep` do último dia anterior aparece como sugestão em "Uma tarefa, agora".
+- Uma distração pode virar item do checklist do dia seguinte (`from` registra a origem).
+- `db.deletedDays` é limpo após 30 dias.
+- `db.meta.lastBackupAt` é gravado ao exportar; o lembrete aparece com 3+ dias registrados e backup com mais de 7 dias (adiável por 3 dias).
+- `db.prefs.sections` guarda as seções visíveis (agenda, studies, applications, clareza).
+
+## Clareza
+
+`clareza-core.js` (regras puras) e `clareza.js` (interface). Dados em `db.clareza` (`version: 1`): `start` (início do período atual, ISO), `streaks` (períodos encerrados com gatilhos e nota), `checkins` (0 a 5 + gatilhos), `sos` (`passed`, `strong`, `relapse`), `reasons`, `plans` (se/então) e `env`.
+
+Dias firmes = dias completos desde `start`. Recorde = maior período. Total acumulado = soma dos períodos + atual: recomeçar nunca apaga dias. O SOS dura 10 minutos com respiração de 4 s inspirando e 6 s soltando; "Ainda está forte" reinicia os 10 minutos e "Tive uma recaída" abre o recomeço. A interface evita termos explícitos e pode ser escondida em ⚙.
+
+No backup, `StudyCore.validateBackup` valida `clareza` quando existe; `mergeBackup` mescla por id, os dados locais ganham e o início local é mantido. Backups antigos continuam válidos. `node tests/clareza.test.cjs` cobre contagem, total, marcos, calendário, padrões, validação e mesclagem.
+
+## App instalável e deploy
+
+`manifest.webmanifest`, `icons/` e `sw.js` tornam o site instalável. O service worker busca a rede primeiro e usa o cache sem internet; dados pessoais não passam por ele. O workflow `.github/workflows/pages.yml` roda os testes e publica `dist` no GitHub Pages a cada push na `main`. `deploy.ps1` automatiza login, criação do repositório, ativação do Pages e push.
