@@ -3,3 +3,7 @@ dist-backup-antes-redesign/
 node_modules/
 .DS_Store
 Thumbs.db
+.neon-key
+.neon
+.env
+.env.local
