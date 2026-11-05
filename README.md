@@ -66,6 +66,7 @@ dist/                 site publicado
   daily-journal.js    escrita livre do dia
   settings.js         tema, seções, backup e registro do app (PWA)
   sw.js, manifest.webmanifest, icons/   app instalável e offline
+  fonts/              Fraunces e Manrope (OFL), servidas localmente
 tests/                testes em Node, sem dependências
 .github/workflows/    publicação automática no GitHub Pages
 deploy.ps1 / .cmd     deploy pelo PowerShell

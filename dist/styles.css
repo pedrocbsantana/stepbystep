@@ -4,6 +4,10 @@
    Tema escuro é o padrão; [data-theme="light"] troca os tokens.
    ===================================================================== */
 
+/* ---------- 0. Fontes (locais, funcionam offline; licença OFL em fonts/) ---------- */
+@font-face{font-family:"Manrope";src:url("fonts/manrope.woff2") format("woff2");font-weight:200 800;font-style:normal;font-display:swap}
+@font-face{font-family:"Fraunces";src:url("fonts/fraunces.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+
 /* ---------- 1. Tokens ---------- */
 :root{
   color-scheme:dark;
@@ -52,8 +56,8 @@
   --shadow:0 18px 50px rgba(0,0,0,.45);
   --ring:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent);
   /* tipografia */
-  --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --font-serif:"Iowan Old Style","Charter","Georgia",serif;
+  --font-sans:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-serif:"Fraunces","Iowan Old Style","Georgia",serif;
   --font-mono:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
   --fs-xs:12px;
   --fs-sm:13px;
@@ -685,4 +689,151 @@ body.has-floating-focus footer{padding-bottom:96px}
 @supports (padding:max(0px)){
   header{padding-top:max(12px,env(safe-area-inset-top))}
   footer{padding-bottom:max(32px,env(safe-area-inset-bottom))}
+}
+
+/* =====================================================================
+   22. Camada visual (v2): profundidade, controles próprios, anéis,
+       navegação inferior no celular e movimento sutil.
+   ===================================================================== */
+:root{
+  --card-shadow:0 1px 0 rgba(255,255,255,.035) inset,0 1px 2px rgba(0,0,0,.25),0 8px 24px -12px rgba(0,0,0,.45);
+  --glow:radial-gradient(1200px 520px at 15% -10%,color-mix(in srgb,var(--accent) 9%,transparent),transparent 60%),radial-gradient(900px 480px at 100% 0%,color-mix(in srgb,var(--accent) 5%,transparent),transparent 55%);
+  --check-img:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%230f2418' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --chevron:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%238d9a92' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  --nav-h:0px;
+}
+:root[data-theme="light"]{
+  --card-shadow:0 1px 2px rgba(31,45,39,.05),0 10px 30px -18px rgba(31,45,39,.22);
+  --glow:radial-gradient(1200px 520px at 15% -10%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 60%);
+  --check-img:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+body{background:var(--glow),var(--bg);background-attachment:fixed;font-feature-settings:"ss01","cv11";letter-spacing:-.005em}
+h1{font-weight:380;letter-spacing:-1.4px;font-variation-settings:"opsz" 96}
+.study-empty h2,.sos-head h2{font-weight:400}
+.card,.study-sidebar,.study-editor,.application-card,.review-card,.app-summary .study-stat{box-shadow:var(--card-shadow)}
+.card{border-color:color-mix(in srgb,var(--line) 85%,transparent)}
+
+/* marca */
+.brand-name{font-family:var(--font-serif);font-weight:600;font-size:22px;letter-spacing:-.6px;font-variation-settings:"opsz" 40}
+.brand-mark svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.icon-button svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* navegação com ícones */
+.main-nav button{display:inline-flex;align-items:center;gap:7px}
+.nav-icon{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;opacity:.85}
+.main-nav button[aria-current=page] .nav-icon{opacity:1}
+.nav-short{display:none}
+@media (min-width:901px) and (max-width:1180px){.main-nav .nav-icon{display:none}}
+
+/* passos numerados viram selos */
+.heading h2 .step{display:inline-grid;place-items:center;min-width:28px;height:24px;padding:0 6px;margin-right:9px;border-radius:7px;background:var(--accent-soft);color:var(--accent-strong);font-size:var(--fs-xs);font-weight:700;letter-spacing:.3px;vertical-align:2px}
+:root[data-theme="light"] .heading h2 .step{color:var(--accent)}
+
+/* resumo do dia */
+.day-summary{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.sum-item{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 10px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--surface) 70%,transparent);font-size:var(--fs-sm);color:var(--muted)}
+.sum-item b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.mini-ring{width:16px;height:16px;transform:rotate(-90deg)}
+.mini-ring circle{fill:none;stroke-width:3;stroke:var(--surface-3)}
+.mini-ring circle+circle{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .4s}
+
+/* controles próprios: checkbox e select */
+input[type=checkbox]{appearance:none;-webkit-appearance:none;width:19px;height:19px;border:1.6px solid var(--line-strong);border-radius:6px;background:var(--field) center/14px no-repeat;display:inline-grid;transition:background-color .15s,border-color .15s,transform .1s;vertical-align:middle}
+input[type=checkbox]:hover{border-color:var(--accent)}
+input[type=checkbox]:checked{background-color:var(--accent);border-color:var(--accent);background-image:var(--check-img)}
+input[type=checkbox]:active{transform:scale(.9)}
+input[type=checkbox]:disabled{opacity:.5;cursor:default}
+select{appearance:none;-webkit-appearance:none;background-image:var(--chevron);background-repeat:no-repeat;background-position:right 9px center;background-size:15px;padding-right:32px}
+
+/* botões: toque com resposta */
+button:active{transform:translateY(1px)}
+.primary{box-shadow:0 1px 0 rgba(255,255,255,.18) inset,0 6px 18px -10px color-mix(in srgb,var(--accent) 80%,transparent)}
+input:focus-visible,textarea:focus-visible,select:focus-visible{border-color:var(--accent)}
+
+/* timer com anel de progresso */
+.timer-wrap{position:relative;width:min(270px,78%);aspect-ratio:1;margin:18px auto 6px;display:grid;place-items:center}
+.timer-ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:color-mix(in srgb,var(--focus-line) 80%,transparent);stroke-width:5}
+.ring-fill{fill:none;stroke:var(--accent);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .3s linear;filter:drop-shadow(0 0 6px color-mix(in srgb,var(--accent) 40%,transparent))}
+.timer-wrap .timer{margin:0;font-size:68px;font-weight:350;font-variation-settings:"opsz" 144;letter-spacing:-2px}
+.focus-card.is-running .ring-track{stroke:color-mix(in srgb,var(--accent) 22%,transparent)}
+.focus-card.is-running .timer{color:var(--accent-strong)}
+:root[data-theme="light"] .focus-card.is-running .timer{color:var(--accent)}
+#focusDock.floating .timer-wrap{width:auto;aspect-ratio:auto;margin:6px 0 2px}
+#focusDock.floating .timer-ring{display:none}
+#focusDock.floating .timer-wrap .timer{font-size:52px}
+body.focus-mode .timer-wrap{width:min(340px,80%)}
+body.focus-mode .timer-wrap .timer{font-size:84px}
+
+/* Clareza: anel do próximo marco */
+.clz-ring-wrap{position:relative;width:150px;height:150px;display:grid;place-items:center;flex:none}
+.clz-ring{position:absolute;inset:0;transform:rotate(-90deg)}
+.clz-ring-wrap .clz-days{font-size:62px;letter-spacing:-2px;font-weight:350;font-variation-settings:"opsz" 144}
+.clz-milestone .progress{display:none}
+.clz-hero{background:linear-gradient(135deg,var(--focus-bg),color-mix(in srgb,var(--focus-bg) 60%,var(--surface)))}
+
+/* cartões de destaque */
+.focus-card{background:linear-gradient(160deg,var(--focus-bg),color-mix(in srgb,var(--focus-bg) 55%,var(--surface)))}
+.study-stat{border:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.study-stat strong{font-family:var(--font-serif);font-weight:450;font-size:24px;letter-spacing:-.4px}
+.dot{transition:transform .2s}
+.day.active .dot{box-shadow:0 4px 14px -6px color-mix(in srgb,var(--accent) 90%,transparent)}
+
+/* movimento: troca de aba e diálogos */
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+main:not([hidden]),.study-page:not([hidden]){animation:rise .28s ease-out}
+dialog[open]{animation:rise .2s ease-out}
+.study-toast:not([hidden]){animation:rise .2s ease-out}
+
+/* celular: navegação inferior, estilo app */
+@media (max-width:900px){
+  :root{--nav-h:64px}
+  body{padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px))}
+  header{flex-wrap:nowrap}
+  .main-nav,header .tag{
+    position:fixed;left:0;right:0;bottom:0;z-index:35;margin:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));
+    display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;overflow:visible;
+    background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px) saturate(1.4);
+    border-top:1px solid var(--line);box-shadow:0 -8px 24px -16px rgba(0,0,0,.5)}
+  .main-nav button{flex-direction:column;gap:3px;padding:6px 2px;border-radius:12px;font-size:12px;min-width:0}
+  .main-nav .nav-icon{width:22px;height:22px;display:block}
+  .main-nav .nav-label{display:none}
+  .main-nav .nav-short{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .main-nav button[aria-current=page]{background:transparent;color:var(--accent)}
+  .main-nav button[aria-current=page] .nav-icon{background:var(--accent-soft);border-radius:999px;padding:3px 12px;width:48px;height:28px;box-sizing:border-box}
+  .main-nav button:hover{background:transparent}
+  #focusDock.floating{bottom:calc(var(--nav-h) + 10px + env(safe-area-inset-bottom,0px))}
+  .study-toast{bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom,0px))}
+  body.focus-mode .main-nav{display:none}
+}
+@media (max-width:760px){
+  .timer-wrap{width:min(240px,74%)}
+  .timer-wrap .timer{font-size:58px}
+  .clz-ring-wrap{width:124px;height:124px}
+  .clz-ring-wrap .clz-days{font-size:50px}
+  h1{font-size:32px}
+}
+@media (prefers-reduced-motion:reduce){main:not([hidden]),.study-page:not([hidden]),dialog[open],.study-toast:not([hidden]){animation:none}}
+
+/* Meu dia: plano e "Durante o dia" na coluna da esquerda, foco ocupando a direita */
+.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"plan focus" "capture focus";grid-template-rows:auto 1fr}
+.layout>#plan{grid-area:plan}
+.layout>#focusDockAnchor,.layout>.focus-card{grid-area:focus}
+.layout>.capture-card{grid-area:capture}
+.capture-card .capture-cols{grid-template-columns:minmax(0,1fr);gap:20px}
+.capture-card .capture-col+.capture-col{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:18px}
+body.focus-mode .capture-card{display:none}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"plan" "focus" "capture";grid-template-rows:auto}}
+h1{letter-spacing:-.7px}
+.timer-wrap .timer{letter-spacing:-1px}
+.timer-wrap{width:min(240px,72%)}
+.timer-wrap .timer{font-size:62px}
+.clz-ring-wrap .clz-days,.clz-days{letter-spacing:-1px}
+/* o Meu dia só faz fade: o Pomodoro é posicionado sobre ele e não pode se deslocar */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+main:not([hidden]){animation:fadeIn .22s ease-out}
+/* no celular o cabeçalho não pode ter backdrop-filter: ele prenderia a navegação fixa dentro dele */
+@media (max-width:900px){
+  header{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+  #plan>.heading:last-of-type{flex-wrap:wrap}
 }

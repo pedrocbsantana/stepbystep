@@ -42,7 +42,7 @@
   <div id="clzMain">
     <div class="clz-hero card">
       <div class="clz-count">
-        <div class="clz-days" id="clzDays">0</div>
+        <div class="clz-ring-wrap"><svg class="clz-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="clzRing" cx="60" cy="60" r="54"/></svg><div class="clz-days" id="clzDays">0</div></div>
         <div><div class="clz-days-label" id="clzDaysLabel">dias firmes</div><div class="small" id="clzSince"></div></div>
       </div>
       <div class="clz-milestone">
@@ -184,6 +184,9 @@
     const reached = [...K.MILESTONES].reverse().find(v => v <= days) ?? 0;
     $('clzMessage').textContent = MESSAGES[reached];
     $('clzProgress').style.width = Math.round(m.progress * 100) + '%';
+    const ring = 2 * Math.PI * 54;
+    $('clzRing').style.strokeDasharray = ring;
+    $('clzRing').style.strokeDashoffset = ring * (1 - m.progress);
     $('clzNext').textContent = m.next ? `Próximo marco: ${plural(m.next, 'dia', 'dias')} · faltam ${m.remaining}` : 'Todos os marcos alcançados.';
     $('clzBest').textContent = K.best(C, now);
     $('clzTotal').textContent = K.total(C, now);

@@ -18,11 +18,11 @@
 </head>
 <body>
 <header>
-  <div class="brand"><span class="brand-mark" aria-hidden="true">↗</span><span class="brand-name">stepbystep</span><span class="brand-tagline">arroz com feijão, todo dia.</span></div>
+  <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="brand-name">stepbystep</span><span class="brand-tagline">arroz com feijão, todo dia.</span></div>
   <div class="tag"></div>
   <div class="header-actions">
-    <button type="button" class="icon-button" id="themeToggle" aria-label="Alternar tema claro e escuro" title="Tema">☾</button>
-    <button type="button" class="icon-button" id="openSettings" aria-label="Configurações e backup" title="Configurações e backup">⚙</button>
+    <button type="button" class="icon-button" id="themeToggle" aria-label="Alternar tema claro e escuro" title="Tema"></button>
+    <button type="button" class="icon-button" id="openSettings" aria-label="Configurações e backup" title="Configurações e backup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1"/><circle cx="15" cy="6.5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17.5" r="2"/></svg></button>
   </div>
 </header>
 
@@ -32,6 +32,7 @@
       <div class="eyebrow" id="introDate">Seu espaço de foco</div>
       <h1 id="introTitle">Hoje, um passo de cada vez.</h1>
       <p>Escolha o próximo passo. O resto pode esperar.</p>
+      <div class="day-summary" id="daySummary" aria-label="Resumo do dia"></div>
     </div>
     <div class="day-nav">
       <button id="prevDay" aria-label="Dia anterior">←</button>
@@ -61,7 +62,7 @@
       <label for="task" class="small">Qual é o menor próximo passo?</label>
       <input id="task" type="text" placeholder="Ex.: criar uma CDS view simples">
       <div class="task-suggestion" id="taskSuggestion" hidden><span class="small">Você deixou para hoje:</span> <strong id="taskSuggestionText"></strong> <button type="button" class="chip-button" id="useSuggestion">Usar</button></div>
-      <div class="timer" id="clock" role="timer">10:00</div>
+      <div class="timer-wrap"><svg class="timer-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="timerRing" cx="60" cy="60" r="54"/></svg><div class="timer" id="clock" role="timer">10:00</div></div>
       <div class="timer-note" id="timerNote" aria-live="polite">Só estes minutos. Você pode começar pequeno.</div>
       <div class="actions"><button class="primary" id="start">▶ Começar</button><button id="reset" aria-label="Reiniciar timer">↻ Reiniciar</button></div>
       <div class="under">
@@ -87,28 +88,28 @@
         <div id="musicStatus" class="music-status" aria-live="polite">Adicione seu link de lofi, escolha a playlist e comece o foco.</div>
       </div>
     </section>
-  </div>
 
-  <!-- Passo 03: capturar durante o dia -->
-  <section class="card capture-card row-gap" aria-labelledby="captureTitle">
-    <div class="heading"><h2 id="captureTitle"><span class="step">03</span>Durante o dia</h2></div>
-    <div class="capture-cols">
-      <div class="capture-col">
-        <h3>Checklist essencial <span class="small" id="checkCount"></span></h3>
-        <p class="small">Passos pequenos e concretos para este dia.</p>
-        <form class="entry" id="checkForm"><input id="checkInput" placeholder="Adicionar um pequeno passo…" aria-label="Nova tarefa do checklist" maxlength="250"><button aria-label="Adicionar tarefa">+</button></form>
-        <button type="button" class="chip-button carry" id="carryChecks" hidden></button>
-        <ul class="items" id="checklist"></ul>
+    <!-- Passo 03: capturar durante o dia -->
+    <section class="card capture-card" aria-labelledby="captureTitle">
+      <div class="heading"><h2 id="captureTitle"><span class="step">03</span>Durante o dia</h2></div>
+      <div class="capture-cols">
+        <div class="capture-col">
+          <h3>Checklist essencial <span class="small" id="checkCount"></span></h3>
+          <p class="small">Passos pequenos e concretos para este dia.</p>
+          <form class="entry" id="checkForm"><input id="checkInput" placeholder="Adicionar um pequeno passo…" aria-label="Nova tarefa do checklist" maxlength="250"><button aria-label="Adicionar tarefa">+</button></form>
+          <button type="button" class="chip-button carry" id="carryChecks" hidden></button>
+          <ul class="items" id="checklist"></ul>
+        </div>
+        <div class="capture-col">
+          <h3>Estacionamento de distrações <span aria-hidden="true" class="small">↳</span></h3>
+          <p class="small">Pensou em outra coisa? Anote aqui e volte à tarefa.</p>
+          <form class="entry" id="distractionForm"><input id="distractionInput" placeholder="Deixo isso para depois…" aria-label="Nova distração" maxlength="250"><button aria-label="Registrar distração">+</button></form>
+          <ul class="items" id="distractions"></ul>
+          <div id="emptyDistractions" class="small" style="margin-top:12px">Seu espaço para tirar as ideias da cabeça.</div>
+        </div>
       </div>
-      <div class="capture-col">
-        <h3>Estacionamento de distrações <span aria-hidden="true" class="small">↳</span></h3>
-        <p class="small">Pensou em outra coisa? Anote aqui e volte à tarefa.</p>
-        <form class="entry" id="distractionForm"><input id="distractionInput" placeholder="Deixo isso para depois…" aria-label="Nova distração" maxlength="250"><button aria-label="Registrar distração">+</button></form>
-        <ul class="items" id="distractions"></ul>
-        <div id="emptyDistractions" class="small" style="margin-top:12px">Seu espaço para tirar as ideias da cabeça.</div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
   <!-- Agenda -->
   <section class="card agenda row-gap" aria-labelledby="agendaHeading">

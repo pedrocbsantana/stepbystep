@@ -70,7 +70,19 @@ function pruneEmptyDays() {
   for (const [k, v] of Object.entries(db.days))
     if (k !== date && isEmptyDay(v)) delete db.days[k];
 }
+// Resumo do dia no topo: blocos, foco e checklist.
+function renderSummary() {
+  if (!day) return;
+  const blocks = day.blocks.filter((b) => b.done).length,
+    checks = day.checks.filter((c) => c.done).length,
+    pct = day.blocks.length ? blocks / day.blocks.length : 0;
+  $("daySummary").innerHTML =
+    `<span class="sum-item"><svg class="mini-ring" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="8" style="stroke-dasharray:${(2 * Math.PI * 8).toFixed(2)};stroke-dashoffset:${(2 * Math.PI * 8 * (1 - pct)).toFixed(2)}"/></svg><b>${blocks}/${day.blocks.length}</b> blocos</span>` +
+    `<span class="sum-item"><b>${day.rounds}</b> ${day.rounds === 1 ? "rodada" : "rodadas"} de foco</span>` +
+    `<span class="sum-item"><b>${checks}/${day.checks.length}</b> checklist</span>`;
+}
 function save() {
+  renderSummary();
   pruneEmptyDays();
   renderHistory();
   try {
@@ -161,6 +173,7 @@ $("useSuggestion").onclick = () => {
   $("task").focus();
 };
 function render() {
+  renderSummary();
   renderSuggestion();
   renderBackupNudge();
   renderAgenda();
@@ -332,9 +345,15 @@ document.addEventListener("click", (e) => {
     renderLists();
   }
 });
+const RING = 2 * Math.PI * 54;
 function clock() {
   $("clock").textContent =
     `${String(Math.floor(remaining / 60)).padStart(2, "0")}:${String(remaining % 60).padStart(2, "0")}`;
+  const totalSeconds = (day?.timerMinutes || 10) * 60,
+    progress = Math.min(1, Math.max(0, 1 - remaining / totalSeconds));
+  $("timerRing").style.strokeDasharray = RING;
+  $("timerRing").style.strokeDashoffset = RING * (1 - progress);
+  document.querySelector(".focus-card").classList.toggle("is-running", running);
   $("start").textContent = running
     ? "Ⅱ Pausar"
     : remaining === 0

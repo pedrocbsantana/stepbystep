@@ -1,11 +1,12 @@
 /* Service worker: o app abre offline. Sempre tenta a rede primeiro (para receber
    atualizações) e usa a cópia guardada quando estiver sem internet.
    Os dados pessoais não passam por aqui: ficam no localStorage do navegador. */
-const CACHE = 'stepbystep-v1';
+const CACHE = 'stepbystep-v2';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'app.js', 'applications-core.js', 'clareza-core.js', 'study-core.js', 'studies.js',
   'applications.js', 'clareza.js', 'focus-dock.js', 'daily-journal.js', 'settings.js',
+  'fonts/manrope.woff2', 'fonts/fraunces.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png',
 ];
 self.addEventListener('install', e => {
