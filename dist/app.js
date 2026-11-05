@@ -1221,7 +1221,46 @@ $("blocks").addEventListener("keydown", (e) => {
     .focus({ preventScroll: true });
   announceBlockOrder(block.name, to);
 });
-window.addEventListener("beforeunload", () => {
-  if (running) pause();
+// Nome e minutos dos blocos salvam enquanto você digita (antes só salvavam ao sair do campo,
+// e um F5 com o cursor ainda no campo perdia a edição).
+$("blocks").addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.dataset.name !== undefined) day.blocks[t.dataset.name].name = t.value;
+  else if (t.dataset.min !== undefined) {
+    const v = parseInt(t.value);
+    if (v >= 1 && v <= 600) day.blocks[t.dataset.min].min = v;
+  } else return;
+  day.planEdited = true;
+  save();
 });
+// Garante a gravação ao recarregar, fechar ou trocar de app (no iPhone o app é suspenso sem aviso).
+function flush() {
+  if (running) pause();
+  else
+    try {
+      localStorage.setItem(key, JSON.stringify(db));
+    } catch {}
+}
+window.addEventListener("beforeunload", flush);
+window.addEventListener("pagehide", flush);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) flush();
+});
+// Verifica se o navegador deixa salvar e pede armazenamento persistente
+// (evita que o Safari apague os dados de sites pouco visitados).
+(function checkStorage() {
+  let ok = true;
+  try {
+    localStorage.setItem("stepbystep-probe", "1");
+    ok = localStorage.getItem("stepbystep-probe") === "1";
+    localStorage.removeItem("stepbystep-probe");
+  } catch {
+    ok = false;
+  }
+  if (!ok) {
+    $("storageWarning").hidden = false;
+    $("saveStatus").textContent = "Não está salvando";
+  }
+  navigator.storage?.persist?.().catch(() => {});
+})();
 load();

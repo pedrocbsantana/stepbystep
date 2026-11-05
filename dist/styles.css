@@ -848,3 +848,4 @@ footer{justify-content:flex-end}
 .clz-hero .clz-milestone{display:flex;flex-direction:column;justify-content:center}
 #clzNext{font-size:var(--fs-sm)}
 .settings-dialog{max-height:90vh;overflow:auto}
+.nudge-danger{border-color:var(--danger-line);background:var(--danger-soft);color:var(--ink)}
