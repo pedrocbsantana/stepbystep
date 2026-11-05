@@ -15,7 +15,13 @@ App pessoal de foco e rotina: plano do dia, timer com música, agenda, estudos c
 | **Clareza** | Dias firmes, botão "Bateu a vontade", check-in, padrões, plano se/então e ambiente |
 | **Histórico** | Sessões de estudo registradas |
 
-Em ⚙ **Configurações**: tema (escuro, claro, sistema), mostrar/esconder seções, exportar/importar backup.
+Em ⚙ **Configurações**: tema, seções visíveis, avisos, exportação para calendário e backup.
+
+## Avisos e calendário
+
+- **Avisos do sistema:** compromisso 10 minutos antes, fim do timer e um resumo do dia na primeira abertura. Funcionam com o app aberto ou aberto há pouco. No iPhone, só depois de instalar o app na tela de início (iOS 16.4+).
+- **Calendário (.ics):** ⚙ → Exportar novidades gera um arquivo com compromissos, revisões e acompanhamentos de vagas, já com alerta. Importe no Google Agenda ou no Calendário do iPhone e o aviso chega mesmo com o app fechado. "Novidades" exporta só o que é novo ou mudou, para não duplicar.
+- A Clareza nunca entra em avisos nem no calendário.
 
 ## Rodar no computador
 
@@ -31,6 +37,7 @@ Depois abra http://localhost:8080. Também funciona com o Live Server do VS Code
 node tests/study-core.test.cjs
 node tests/applications.test.cjs
 node tests/clareza.test.cjs
+node tests/reminders.test.cjs
 ```
 
 Os testes também rodam no GitHub antes de cada publicação.
@@ -65,6 +72,8 @@ dist/                 site publicado
   focus-dock.js       Pomodoro flutuante
   daily-journal.js    escrita livre do dia
   settings.js         tema, seções, backup e registro do app (PWA)
+  reminders-core.js   regras puras de lembretes e geração do .ics
+  notify.js           avisos do sistema e exportação para calendário
   sw.js, manifest.webmanifest, icons/   app instalável e offline
   fonts/              Fraunces e Manrope (OFL), servidas localmente
 tests/                testes em Node, sem dependências

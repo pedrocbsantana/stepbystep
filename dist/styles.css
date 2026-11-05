@@ -847,3 +847,4 @@ footer{justify-content:flex-end}
 .study-top{align-items:center}
 .clz-hero .clz-milestone{display:flex;flex-direction:column;justify-content:center}
 #clzNext{font-size:var(--fs-sm)}
+.settings-dialog{max-height:90vh;overflow:auto}

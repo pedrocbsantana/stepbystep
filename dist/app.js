@@ -365,6 +365,7 @@ function pause() {
 }
 function finish() {
   window.FocusDock?.ring();
+  window.Notify?.timerDone(day.task);
   window.StudyBridge?.onFinish();
   pauseFocusMusic();
   running = false;

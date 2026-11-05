@@ -1,11 +1,11 @@
 /* Service worker: o app abre offline. Sempre tenta a rede primeiro (para receber
    atualizações) e usa a cópia guardada quando estiver sem internet.
    Os dados pessoais não passam por aqui: ficam no localStorage do navegador. */
-const CACHE = 'stepbystep-v3';
+const CACHE = 'stepbystep-v4';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'app.js', 'applications-core.js', 'clareza-core.js', 'study-core.js', 'studies.js',
-  'applications.js', 'clareza.js', 'focus-dock.js', 'daily-journal.js', 'settings.js',
+  'applications.js', 'clareza.js', 'focus-dock.js', 'daily-journal.js', 'settings.js', 'reminders-core.js', 'notify.js',
   'fonts/manrope.woff2', 'fonts/fraunces.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png',
 ];
@@ -26,4 +26,13 @@ self.addEventListener('fetch', e => {
       })
       .catch(() => caches.match(req, { ignoreSearch: true }).then(hit => hit || (req.mode === 'navigate' ? caches.match('index.html') : Response.error())))
   );
+});
+
+// Tocar no aviso abre (ou traz para frente) o app.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    const open = list.find(c => 'focus' in c);
+    return open ? open.focus() : self.clients.openWindow('./');
+  }));
 });
