@@ -17,6 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="stepbystep">
 </head>
 <body>
+<a class="skip-link" href="#introTitle">Pular para o conteúdo</a>
 <header>
   <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span><span class="brand-name">stepbystep</span></div>
   <div class="tag"></div>
@@ -29,8 +30,8 @@
 <main>
   <div class="intro">
     <div>
-      <div class="eyebrow" id="introDate"></div>
-      <h1 id="introTitle"></h1>
+      <div class="sr-only" id="introDate"></div>
+      <h1 id="introTitle" tabindex="-1"></h1>
       <div class="day-summary" id="daySummary" aria-label="Resumo do dia"></div>
     </div>
     <div class="day-nav">
@@ -58,8 +59,9 @@
 
     <section class="card focus-card" aria-labelledby="focusTitle">
       <div class="heading"><h2 id="focusTitle">Foco</h2><button class="quiet" id="focusMode">Expandir</button></div>
-      <label for="task" class="sr-only">Tarefa</label>
-      <input id="task" type="text" placeholder="Próxima tarefa">
+      <label for="task" class="caption">Em que você vai trabalhar?</label>
+      <input id="task" type="text" aria-describedby="taskHint timerNote" placeholder="Ex.: revisar uma anotação">
+      <p class="small" id="taskHint">Escolha uma tarefa e comece o timer.</p>
       <div class="task-suggestion" id="taskSuggestion" hidden><span class="small">De ontem:</span> <strong id="taskSuggestionText"></strong> <button type="button" class="chip-button" id="useSuggestion">Usar</button></div>
       <div class="timer-wrap"><svg class="timer-ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="timerRing" cx="60" cy="60" r="54"/></svg><div class="timer" id="clock" role="timer">10:00</div></div>
       <div class="timer-note" id="timerNote" aria-live="polite"></div>
@@ -93,13 +95,13 @@
       <div class="capture-cols">
         <div class="capture-col">
           <h3>Checklist <span class="small" id="checkCount"></span></h3>
-          <form class="entry" id="checkForm"><input id="checkInput" placeholder="Adicionar item" aria-label="Nova tarefa do checklist" maxlength="250"><button aria-label="Adicionar tarefa">+</button></form>
+          <label for="checkInput" class="caption">Novo item</label><form class="entry" id="checkForm"><input id="checkInput" placeholder="Adicionar item" aria-label="Nova tarefa do checklist" maxlength="250"><button aria-label="Adicionar tarefa">+</button></form>
           <button type="button" class="chip-button carry" id="carryChecks" hidden></button>
           <ul class="items" id="checklist"></ul>
         </div>
         <div class="capture-col">
           <h3>Distrações</h3>
-          <form class="entry" id="distractionForm"><input id="distractionInput" placeholder="Anotar e voltar ao foco" aria-label="Nova distração" maxlength="250"><button aria-label="Registrar distração">+</button></form>
+          <label for="distractionInput" class="caption">O que veio à cabeça?</label><form class="entry" id="distractionForm"><input id="distractionInput" placeholder="Anotar e voltar ao foco" aria-label="Nova distração" maxlength="250"><button aria-label="Registrar distração">+</button></form>
           <ul class="items" id="distractions"></ul>
           <div id="emptyDistractions" hidden></div>
         </div>

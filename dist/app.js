@@ -74,10 +74,9 @@ function pruneEmptyDays() {
 function renderSummary() {
   if (!day) return;
   const blocks = day.blocks.filter((b) => b.done).length,
-    checks = day.checks.filter((c) => c.done).length,
-    pct = day.blocks.length ? blocks / day.blocks.length : 0;
+    checks = day.checks.filter((c) => c.done).length;
   $("daySummary").innerHTML =
-    `<span class="sum-item"><svg class="mini-ring" viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8"/><circle cx="10" cy="10" r="8" style="stroke-dasharray:${(2 * Math.PI * 8).toFixed(2)};stroke-dashoffset:${(2 * Math.PI * 8 * (1 - pct)).toFixed(2)}"/></svg><b>${blocks}/${day.blocks.length}</b> blocos</span>` +
+    `<span class="sum-item"><b>${blocks}/${day.blocks.length}</b> blocos</span>` +
     `<span class="sum-item"><b>${day.rounds}</b> ${day.rounds === 1 ? "rodada" : "rodadas"} de foco</span>` +
     `<span class="sum-item"><b>${checks}/${day.checks.length}</b> checklist</span>`;
 }
@@ -390,11 +389,13 @@ $("start").onclick = () => {
     return;
   }
   if (!$("task").value.trim()) {
+    $("task").setAttribute("aria-invalid", "true");
     $("task").focus();
     $("timerNote").textContent =
       "Escreva a tarefa primeiro.";
     return;
   }
+  $("task").removeAttribute("aria-invalid");
   if (!remaining) remaining = day.timerMinutes * 60;
   running = true;
   end = Date.now() + remaining * 1000;
@@ -1264,3 +1265,10 @@ document.addEventListener("visibilitychange", () => {
   navigator.storage?.persist?.().catch(() => {});
 })();
 load();
+
+$("task").addEventListener("input", () => {
+  if ($("task").hasAttribute("aria-invalid")) {
+    $("task").removeAttribute("aria-invalid");
+    $("timerNote").textContent = "";
+  }
+});

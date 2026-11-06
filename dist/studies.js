@@ -58,9 +58,13 @@
     if(target==='reviews')renderReviews();
     if(target==='history')renderHistoryPage();
     window.FocusDock?.setView(target);
-    window.scrollTo({
-      top:0,behavior:'smooth'
-    })
+    const heading=document.querySelector('main:not([hidden]) h1, .study-page:not([hidden]) h1');
+    if(heading){
+      heading.tabIndex=-1;
+      heading.focus({preventScroll:true});
+      document.querySelector('.skip-link').href='#'+(heading.id||(heading.id='pageTitle-'+target));
+    }
+    window.scrollTo({top:0,behavior:'instant'})
   } nav.onclick=e=>{
     const b=e.target.closest('[data-study-view]');
     if(b)go(b.dataset.studyView)
@@ -229,7 +233,7 @@
     renderTree();
     const n=note();
     if(!n){
-      $('studyEditor').innerHTML=subject()?`<div class="study-empty"><span class="eyebrow">${E(topicId?S.topics.find(t=>t.id===topicId)?.name:subject().name)}</span><h2>Nenhuma anotação aberta</h2>${relatedNotesHTML()}<div class="study-row" style="justify-content:center"><button class="primary" id="newNote">+ Anotação</button><button id="newTopic">+ Tópico</button><button id="subjectFocus">Iniciar foco</button></div></div>`:'<div class="study-empty"><h2>Nenhuma matéria</h2><button class="primary" id="firstSubject">Criar matéria</button></div>';
+      $('studyEditor').innerHTML=subject()?`<div class="study-empty"><h2>Nenhuma anotação aberta</h2><p>${E(topicId?S.topics.find(t=>t.id===topicId)?.name:subject().name)}</p>${relatedNotesHTML()}<div class="study-row" style="justify-content:center"><button class="primary" id="newNote">+ Anotação</button><button id="newTopic">+ Tópico</button><button id="subjectFocus">Iniciar foco</button></div></div>`:'<div class="study-empty"><h2>Nenhuma matéria</h2><button class="primary" id="firstSubject">Criar matéria</button></div>';
       $('studyEditor').querySelectorAll('[data-related-note]').forEach(b=>b.onclick=()=>openNote(b.dataset.relatedNote));
       if($('newNote'))$('newNote').onclick=createNote;
       if($('newTopic'))$('newTopic').onclick=()=>editEntity('topic');
