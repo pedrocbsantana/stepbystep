@@ -1236,16 +1236,20 @@ $("blocks").addEventListener("input", (e) => {
 });
 // Garante a gravação ao recarregar, fechar ou trocar de app (no iPhone o app é suspenso sem aviso).
 function flush() {
-  if (running) pause();
-  else
-    try {
-      localStorage.setItem(key, JSON.stringify(db));
-    } catch {}
+  // Salvar não é pausar: o prazo absoluto continua valendo em segundo plano.
+  if (running) day.remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+  try {
+    localStorage.setItem(key, JSON.stringify(db));
+  } catch {}
 }
 window.addEventListener("beforeunload", flush);
 window.addEventListener("pagehide", flush);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) flush();
+  else if (running) tick();
+});
+window.addEventListener("pageshow", () => {
+  if (running) tick();
 });
 // Verifica se o navegador deixa salvar e pede armazenamento persistente
 // (evita que o Safari apague os dados de sites pouco visitados).
