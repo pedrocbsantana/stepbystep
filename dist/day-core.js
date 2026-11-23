@@ -113,7 +113,11 @@
         typeof a.title !== "string" ||
         !TIME.test(a.start) ||
         !TIME.test(a.end) ||
-        a.end <= a.start
+        a.end <= a.start ||
+        (a.reminders !== undefined &&
+          (!Array.isArray(a.reminders) ||
+            a.reminders.length > 10 ||
+            a.reminders.some((n) => !Number.isInteger(n) || n < 0 || n > 43200)))
       )
         throw Error("Compromisso inválido.");
     return v;

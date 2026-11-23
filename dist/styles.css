@@ -951,3 +951,15 @@ h1[tabindex="-1"]:focus,h2[tabindex="-1"]:focus{outline:none;box-shadow:none}
   .board{grid-template-columns:1fr}
   .board-actions button{min-width:40px;min-height:40px}
 }
+
+/* Lembretes de compromissos */
+.reminder-field{border:0;padding:0;margin:4px 0 0;min-width:0}
+.reminder-field legend{font-size:var(--fs-sm,14px);color:var(--muted);margin-bottom:6px;padding:0}
+.reminder-picker{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.reminder-chip{background:transparent;border-color:var(--line-strong);color:var(--muted);min-height:32px;padding:4px 12px}
+.reminder-chip[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent-line);color:var(--ink)}
+.reminder-chip[aria-pressed=true]::before{content:'✓ ';color:var(--accent)}
+.reminder-custom{display:inline-flex;gap:6px;align-items:center}
+.reminder-custom input{width:64px;min-height:32px;padding:4px 8px}
+.reminder-custom select{min-height:32px;padding:4px 8px}
+.reminder-picker .small{width:100%;margin:2px 0 0}

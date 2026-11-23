@@ -23,6 +23,39 @@
     } catch { return false; }
   }
 
+  // ---------- Seletor de lembretes ----------
+  const PRESETS = [0, 10, 30, 60, 120, 1440, 2880, 10080];
+  const UNITS = [['min', 1], ['horas', 60], ['dias', 1440]];
+  function mountPicker(el, values, onChange) {
+    el._values = [...values];
+    el._onChange = onChange;
+    const draw = () => {
+      const vals = el._values, extra = vals.filter(v => !PRESETS.includes(v));
+      el.innerHTML = [...PRESETS, ...extra].sort((a, b) => a - b).map(v =>
+        `<button type="button" class="chip-button reminder-chip" data-min="${v}" aria-pressed="${vals.includes(v)}">${R.reminderLabel(v)}</button>`).join('') +
+        `<span class="reminder-custom"><input type="number" min="1" max="999" inputmode="numeric" aria-label="Outro tempo"><select aria-label="Unidade">${UNITS.map(([l, m]) => `<option value="${m}">${l}</option>`).join('')}</select><button type="button" class="chip-button" data-add>Adicionar</button></span>` +
+        (vals.length ? '' : '<p class="small">Sem aviso para este compromisso.</p>');
+    };
+    el.onclick = e => {
+      const chip = e.target.closest('[data-min]');
+      if (chip) {
+        const v = +chip.dataset.min;
+        el._values = el._values.includes(v) ? el._values.filter(x => x !== v) : [...el._values, v].slice(-10);
+      } else if (e.target.closest('[data-add]')) {
+        const n = +el.querySelector('input').value, v = n * +el.querySelector('select').value;
+        if (!Number.isInteger(v) || v < 1 || v > R.MAX_REMINDER) return;
+        if (!el._values.includes(v)) el._values = [...el._values, v].slice(-10);
+      } else return;
+      draw();
+      el._onChange?.(el._values);
+    };
+    draw();
+  }
+  window.Reminders = {
+    mount: (el, values) => mountPicker(el, values),
+    read: el => [...new Set(el._values || [])].sort((a, b) => b - a),
+  };
+
   // ---------- Configurações ----------
   function renderStatus() {
     const status = $('notifyStatus'), enable = $('notifyEnable'), test = $('notifyTest');
@@ -37,7 +70,7 @@
       status.textContent = 'Bloqueados. Libere nas configurações do navegador.';
       enable.hidden = true;
     } else if (enabled()) {
-      status.textContent = 'Ativos: compromissos 10 min antes, fim do timer e resumo do dia.';
+      status.textContent = `Ativos: compromissos (padrão: ${R.remindersOf({}, db.prefs).map(R.reminderLabel).join(', ') || 'sem aviso'} antes), fim do timer e resumo do dia.`;
       enable.textContent = 'Desativar';
     } else {
       status.textContent = 'Desativados.';
@@ -57,7 +90,10 @@
     if (result === 'granted') notify('Avisos ativos', 'Tudo certo.', 'test');
   };
   $('notifyTest').onclick = () => notify('Teste', 'Os avisos estão funcionando.', 'test');
-  $('openSettings').addEventListener('click', renderStatus);
+  $('openSettings').addEventListener('click', () => {
+    renderStatus();
+    mountPicker($('defaultReminders'), R.remindersOf({}, db.prefs), v => { db.prefs.reminders = [...v].sort((a, b) => b - a); persist(); renderStatus(); });
+  });
 
   // ---------- Avisos ----------
   // Fim do timer (chamado por app.js).
@@ -72,20 +108,17 @@
     persist();
     if (s.text) notify('Hoje', s.text, 'summary');
   }
-  // Compromissos que começam nos próximos 10 minutos.
+  // Lembretes dos compromissos (dias, horas ou minutos antes, conforme cada um).
   function checkUpcoming() {
     if (!enabled()) return;
-    const t = todayKey();
-    db.meta.notified ??= {};
-    for (const k of Object.keys(db.meta.notified)) if (!k.startsWith(t)) delete db.meta.notified[k];
-    let changed = false;
-    for (const a of R.upcoming(db, new Date(), 10)) {
-      const k = `${t}|${a.id}`;
-      if (db.meta.notified[k]) continue;
-      db.meta.notified[k] = true; changed = true;
-      notify(a.title, `${a.start}–${a.end}`, 'event-' + a.id);
+    const now = new Date();
+    db.meta.notified = R.pruneNotified(db.meta.notified || {}, todayKey());
+    const due = R.dueReminders(db, now, db.meta.notified);
+    for (const a of due) {
+      a.keys.forEach(k => (db.meta.notified[k] = true));
+      notify(a.title, R.reminderText(a, now), 'event-' + a.id);
     }
-    if (changed) persist();
+    if (due.length) persist();
   }
   setInterval(checkUpcoming, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { dailySummary(); checkUpcoming(); } });

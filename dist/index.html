@@ -184,6 +184,7 @@
     <label for="eventTitle">Compromisso</label><input id="eventTitle" required maxlength="150" >
     <div class="event-times"><div><label for="eventStart">Início</label><input id="eventStart" type="time" required></div><div><label for="eventEnd">Fim</label><input id="eventEnd" type="time" required></div></div>
     <label for="eventNotes">Observações (opcional)</label><textarea id="eventNotes" maxlength="2000" ></textarea>
+    <fieldset class="reminder-field"><legend>Avisar antes</legend><div id="eventReminders" class="reminder-picker"></div></fieldset>
     <label class="inline-label"><input type="checkbox" id="eventDone"> Compromisso concluído</label>
     <div class="event-error" id="eventError" role="alert"></div>
     <div class="event-buttons"><button type="button" id="deleteEvent">Excluir</button><button type="button" id="cancelEvent">Cancelar</button><button class="primary" type="submit">Salvar</button></div>
@@ -220,6 +221,7 @@
     <h3>Avisos</h3>
     <p class="small" id="notifyStatus"></p>
     <div class="row"><button type="button" id="notifyEnable">Ativar avisos</button><button type="button" id="notifyTest" hidden>Testar</button></div>
+    <fieldset class="reminder-field"><legend>Lembretes padrão de compromissos novos</legend><div id="defaultReminders" class="reminder-picker"></div></fieldset>
   </div>
   <div class="settings-section">
     <h3>Calendário</h3>

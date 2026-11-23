@@ -668,6 +668,7 @@ function openEvent(id = null, hour = null, eventDate = date) {
     v?.end || (hour !== null ? timeValue(Math.min(1439, hour * 60 + 60)) : "");
   $("eventNotes").value = v?.notes || "";
   $("eventDone").checked = !!v?.done;
+  window.Reminders?.mount($("eventReminders"), ReminderCore.remindersOf(v || {}, db.prefs));
   $("deleteEvent").hidden = !v;
   $("eventError").textContent = "";
   window.StudyBridge?.openEvent(v, eventDate);
@@ -735,6 +736,7 @@ $("eventForm").onsubmit = (e) => {
     end,
     notes: $("eventNotes").value.trim(),
     done: $("eventDone").checked,
+    ...(window.Reminders ? { reminders: window.Reminders.read($("eventReminders")) } : {}),
     ...(window.StudyBridge?.readEvent() || {}),
   };
   db.days[target] ??= defaults();
