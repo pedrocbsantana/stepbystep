@@ -748,8 +748,11 @@ $("eventForm").onsubmit = (e) => {
   db.days[target].appointments.push(v);
   save();
   $("eventDialog").close();
-  pickCalendarDay(target);
-  $("agendaScroll").scrollTop = Math.max(0, minuteValue(start) - 30);
+  // Só leva o Meu dia até a data do compromisso se ele estiver na tela.
+  if (!document.querySelector("main").hidden) {
+    pickCalendarDay(target);
+    $("agendaScroll").scrollTop = Math.max(0, minuteValue(start) - 30);
+  } else renderAgenda();
 };
 $("deleteEvent").onclick = () => {
   db.days[eventSourceDate].appointments = db.days[

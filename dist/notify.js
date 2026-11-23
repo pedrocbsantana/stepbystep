@@ -24,7 +24,8 @@
   }
 
   // ---------- Seletor de lembretes ----------
-  const PRESETS = [0, 10, 30, 60, 120, 1440, 2880, 10080];
+  const PRESETS = [0, 10, 30, 60, 120, 1440, 2880, 4320, 10080];
+  const DAILY = [1440, 2880, 4320, 5760, 7200, 8640, 10080]; // 1 a 7 dias antes
   const UNITS = [['min', 1], ['horas', 60], ['dias', 1440]];
   function mountPicker(el, values, onChange) {
     el._values = [...values];
@@ -33,6 +34,7 @@
       const vals = el._values, extra = vals.filter(v => !PRESETS.includes(v));
       el.innerHTML = [...PRESETS, ...extra].sort((a, b) => a - b).map(v =>
         `<button type="button" class="chip-button reminder-chip" data-min="${v}" aria-pressed="${vals.includes(v)}">${R.reminderLabel(v)}</button>`).join('') +
+        `<button type="button" class="chip-button reminder-chip reminder-daily" data-daily aria-pressed="${DAILY.every(v => vals.includes(v))}">Todo dia na última semana</button>` +
         `<span class="reminder-custom"><input type="number" min="1" max="999" inputmode="numeric" aria-label="Outro tempo"><select aria-label="Unidade">${UNITS.map(([l, m]) => `<option value="${m}">${l}</option>`).join('')}</select><button type="button" class="chip-button" data-add>Adicionar</button></span>` +
         (vals.length ? '' : '<p class="small">Sem aviso para este compromisso.</p>');
     };
@@ -41,6 +43,9 @@
       if (chip) {
         const v = +chip.dataset.min;
         el._values = el._values.includes(v) ? el._values.filter(x => x !== v) : [...el._values, v].slice(-10);
+      } else if (e.target.closest('[data-daily]')) {
+        const on = DAILY.every(v => el._values.includes(v));
+        el._values = on ? el._values.filter(v => !DAILY.includes(v)) : [...new Set([...DAILY, ...el._values])].sort((a, b) => b - a).slice(0, 10);
       } else if (e.target.closest('[data-add]')) {
         const n = +el.querySelector('input').value, v = n * +el.querySelector('select').value;
         if (!Number.isInteger(v) || v < 1 || v > R.MAX_REMINDER) return;
