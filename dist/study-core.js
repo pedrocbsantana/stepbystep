@@ -117,12 +117,9 @@
     if(incoming.applications!==undefined)root.ApplicationCore?.validate(incoming.applications);
     validateStudy(incoming.study);if(incoming.clareza!==undefined){if(!root.ClarezaCore)throw Error('Backup com dados de Clareza: recarregue a página.');root.ClarezaCore.validate(incoming.clareza)}
     if(!incoming.days||typeof incoming.days!=='object'||Array.isArray(incoming.days))throw Error('Histórico diário inválido.');
+    if(!root.DayCore)throw Error('Recarregue a página para importar o backup.');
     for(const [d,v] of Object.entries(incoming.days)){
-      if(!validDate(d)||!v||!Array.isArray(v.blocks)||!Array.isArray(v.checks)||!Array.isArray(v.distractions)||!Number.isFinite(v.timerMinutes)||v.timerMinutes<1||v.timerMinutes>180)throw Error('Dia inválido no backup.');
-      for(const b of v.blocks)if(typeof b.name!=='string'||!Number.isFinite(b.min)||b.min<1)throw Error('Bloco inválido.');
-      for(const c of v.checks)if(typeof c.text!=='string')throw Error('Checklist inválido.');
-      if(v.distractions.some(x=>typeof x!=='string'))throw Error('Distração inválida.');
-      for(const a of v.appointments||[])if(typeof a.id!=='string'||typeof a.title!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(a.start)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(a.end)||a.end<=a.start)throw Error('Compromisso inválido.')
+      try{root.DayCore.validateDay(d,v)}catch(e){throw Error('Dia inválido no backup ('+d+'): '+e.message)}
     }  return incoming;
   } function mergeBackup(current,incoming){
     const merged=JSON.parse(JSON.stringify(current));

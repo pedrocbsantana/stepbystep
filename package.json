@@ -1,0 +1,10 @@
+{
+  "name": "stepbystep",
+  "private": true,
+  "description": "Seu dia, uma tarefa por vez. Site estático, sem build.",
+  "scripts": {
+    "test": "node --test \"tests/*.test.cjs\"",
+    "format": "npx --yes prettier@3.3.3 --write \"dist/**/*.{js,css}\" \"tests/**/*.cjs\"",
+    "format:check": "npx --yes prettier@3.3.3 --check \"dist/**/*.{js,css}\" \"tests/**/*.cjs\""
+  }
+}

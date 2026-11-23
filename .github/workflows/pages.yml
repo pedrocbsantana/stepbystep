@@ -24,7 +24,7 @@ jobs:
         with:
           node-version: 22
       - name: Rodar testes
-        run: for t in tests/*.cjs; do node "$t"; done
+        run: node --test "tests/*.test.cjs"
 
   publicar:
     needs: testar
@@ -35,6 +35,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Cada publicação ganha um cache novo no service worker: os aparelhos baixam a versão nova
+      # sem ninguém precisar lembrar de trocar o número à mão.
+      - name: Versionar o cache do app
+        run: |
+          sed -i -E "s/^const CACHE = .*;$/const CACHE = 'stepbystep-${GITHUB_SHA::8}';/" dist/sw.js
+          grep -q "stepbystep-${GITHUB_SHA::8}" dist/sw.js
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

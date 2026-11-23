@@ -51,7 +51,7 @@ foreach ($t in $tools) {
 # 2. Testes (se o Node estiver instalado)
 if (Has 'node') {
   Step 'Rodando os testes'
-  Get-ChildItem -Path tests -Filter *.cjs | ForEach-Object { Invoke-Native 'node' @($_.FullName) }
+  Invoke-Native 'node' @('--test', 'tests/*.test.cjs')
 } else {
   Warn 'Node não encontrado: pulando os testes locais (eles rodam no GitHub antes de publicar).'
 }

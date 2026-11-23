@@ -34,7 +34,7 @@
   }
   $('focusDockToggle').onclick=()=>{minimized=!minimized;db.focusPrefs.minimized=minimized;refreshCompact();persistPrefs();requestAnimationFrame(sync)};
   new MutationObserver(()=>$('focusDockMiniClock').textContent=$('clock').textContent).observe($('clock'),{childList:true,characterData:true,subtree:true});
-  function persistPrefs(){try{localStorage.setItem(key,JSON.stringify(db))}catch{$('focusBellStatus').textContent='Não foi possível salvar a preferência.'}}
+  function persistPrefs(){try{saveDB()}catch{$('focusBellStatus').textContent='Não foi possível salvar a preferência.'}}
   function enableAudio(){
     try{
       const Context=window.AudioContext||window.webkitAudioContext;

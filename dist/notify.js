@@ -9,7 +9,7 @@
   const standalone = window.matchMedia?.('(display-mode: standalone)').matches || navigator.standalone === true;
   const supported = 'Notification' in window;
   const todayKey = () => localDate(new Date());
-  const persist = () => { try { localStorage.setItem(key, JSON.stringify(db)); } catch {} };
+  const persist = () => { try { saveDB(); } catch {} };
   const enabled = () => supported && Notification.permission === 'granted' && db.prefs.notify !== false;
 
   async function notify(title, body, tag) {

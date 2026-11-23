@@ -89,10 +89,15 @@
   // Aplica linhas vindas da nuvem. Documentos alterados aqui e ainda não enviados ganham
   // (a versão local é a mais recente e vai subir em seguida), exceto quando preferRemote = true.
   // skip: documentos que contam como inexistentes (ex.: dia vazio criado só por abrir o app).
-  function applyRemote(db, rows, known, { preferRemote = false, skip } = {}) {
+  // validate: função (chave, valor) que lança erro para documento estragado. Documento rejeitado
+  // não é aplicado nem marcado como conhecido; se mudar aqui depois, a versão local sobe normalmente.
+  function applyRemote(db, rows, known, { preferRemote = false, skip, validate, onReject } = {}) {
     const docs = explode(db, skip);
     const changed = [];
     for (const r of rows) {
+      if (validate && !r.deleted) {
+        try { validate(r.key, r.data); } catch (err) { onReject?.(r.key, err); continue; }
+      }
       const localDirty = r.key in docs ? known[r.key] !== hash(docs[r.key]) : r.key in known && known[r.key] !== 'deleted';
       const remoteHash = r.deleted ? 'deleted' : hash(r.data);
       if (localDirty && !preferRemote) continue;
@@ -106,5 +111,79 @@
     return changed;
   }
 
-  root.SyncCore = { stable, hash, explode, applyDoc, localChanges, applyRemote };
+  // ---------- Validação do que vem da nuvem ----------
+  // Confere só a forma que a interface precisa para não quebrar ao desenhar.
+  const ID = /^[A-Za-z0-9_-]+$/;
+  const isObj = v => !!v && typeof v === 'object' && !Array.isArray(v);
+  const strings = (v, ...ks) => ks.every(k => typeof v[k] === 'string');
+  const optString = (v, k) => v[k] === undefined || v[k] === null || typeof v[k] === 'string';
+
+  function validateDoc(key, v) {
+    const fail = () => { throw Error('Documento inválido: ' + key); };
+    if (key.startsWith('day:')) { root.DayCore.validateDay(key.slice(4), v); return; }
+    if (key === 'plan') { root.DayCore.validatePlan(v); return; }
+    if (key === 'music') { if (!isObj(v) || (v.items !== undefined && !Array.isArray(v.items))) fail(); return; }
+    if (key === 'sections') { if (!isObj(v)) fail(); return; }
+    if (key === 'clz:core') {
+      if (!isObj(v) || typeof (v.reasons ?? '') !== 'string' || !isObj(v.env ?? {})) fail();
+      root.ClarezaCore?.validate({ start: v.start });
+      return;
+    }
+    const prefix = ARRAYS.map(a => a[0]).find(p => key.startsWith(p));
+    const id = prefix && key.slice(prefix.length);
+    if (!prefix || !ID.test(id) || !isObj(v) || v.id !== id) fail();
+    switch (prefix) {
+      case 'study:subjects:': if (!strings(v, 'name')) fail(); break;
+      case 'study:topics:': if (!strings(v, 'name', 'subjectId') || !optString(v, 'parentId')) fail(); break;
+      case 'study:notes:':
+        if (!strings(v, 'subjectId', 'title', 'body') || !optString(v, 'topicId')) fail();
+        if (v.questions !== undefined && !Array.isArray(v.questions)) fail();
+        if (v.review && (!isObj(v.review) || !Array.isArray(v.review.history))) fail();
+        break;
+      case 'study:sessions:':
+        if (!Number.isFinite(v.minutes) || v.minutes <= 0 || v.minutes > 1440 || !root.DayCore.validDate(v.date) || !strings(v, 'subjectName')) fail();
+        break;
+      case 'app:': root.ApplicationCore.validate([v]); break;
+      case 'clz:streaks:': root.ClarezaCore.validate({ streaks: [v] }); break;
+      case 'clz:checkins:': root.ClarezaCore.validate({ checkins: [v] }); break;
+      case 'clz:sos:': root.ClarezaCore.validate({ sos: [v] }); break;
+      case 'clz:plans:': root.ClarezaCore.validate({ plans: [v] }); break;
+    }
+  }
+
+  // ---------- Cifragem (AES-GCM) ----------
+  // A chave de cifra é derivada da chave de sincronização, que só existe nos seus aparelhos.
+  // Assim, quem enxergar o banco (painel do Neon, backup do provedor) vê só texto embaralhado.
+  // A chave do documento entra como "dado associado": um conteúdo não pode ser trocado de lugar.
+  const SALT = 'stepbystep-sync-v1';
+  const te = new TextEncoder(), td = new TextDecoder();
+  const subtle = () => root.crypto.subtle;
+  function toB64(bytes) {
+    let s = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(s);
+  }
+  const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+  async function deriveKey(secret) {
+    const base = await subtle().importKey('raw', te.encode(secret), 'PBKDF2', false, ['deriveKey']);
+    return subtle().deriveKey(
+      { name: 'PBKDF2', salt: te.encode(SALT), iterations: 210000, hash: 'SHA-256' },
+      base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  const isSealed = d => isObj(d) && d.$enc === 1 && typeof d.iv === 'string' && typeof d.ct === 'string';
+
+  async function seal(cryptoKey, key, value) {
+    const iv = root.crypto.getRandomValues(new Uint8Array(12));
+    const ct = await subtle().encrypt({ name: 'AES-GCM', iv, additionalData: te.encode(key) }, cryptoKey, te.encode(JSON.stringify(value)));
+    return { $enc: 1, iv: toB64(iv), ct: toB64(new Uint8Array(ct)) };
+  }
+  // Documentos antigos (de antes da cifragem) vêm abertos e passam direto.
+  async function unseal(cryptoKey, key, data) {
+    if (!isSealed(data)) return data;
+    const pt = await subtle().decrypt({ name: 'AES-GCM', iv: fromB64(data.iv), additionalData: te.encode(key) }, cryptoKey, fromB64(data.ct));
+    return JSON.parse(td.decode(pt));
+  }
+
+  root.SyncCore = { stable, hash, explode, applyDoc, localChanges, applyRemote, validateDoc, deriveKey, isSealed, seal, unseal };
 })(typeof window === 'undefined' ? globalThis : window);

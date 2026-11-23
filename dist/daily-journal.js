@@ -11,7 +11,7 @@
   $('dailyJournal').addEventListener('input',()=>{
     day.journal=$('dailyJournal').value;
     updateCount();
-    try{localStorage.setItem(key,JSON.stringify(db));$('journalSave').textContent='Salvo'}
+    try{saveDB();$('journalSave').textContent='Salvo'}
     catch{$('journalSave').textContent='Falha ao salvar. Exporte um backup.'}
   });
   window.DailyJournal={load:loadJournal};

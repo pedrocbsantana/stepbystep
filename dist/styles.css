@@ -872,3 +872,54 @@ input[aria-invalid=true]{border-color:var(--danger)}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+.note-review-copy{margin:16px 0;padding-block:12px;border-block:1px solid var(--line)}
+.note-review-copy button{max-width:100%;white-space:normal;text-align:left}
+.note-review-copy p{margin:8px 0 0}
+#copyNoteFallback{margin-top:12px}
+#copyNoteText{margin-bottom:0}
+
+/* ---------- Acabamento ---------- */
+
+/* Clareza: o anel do próximo marco (perdeu o estilo quando o anel do timer saiu). */
+.clz-ring .ring-track{fill:none;stroke:var(--surface-3);stroke-width:6}
+.clz-ring .ring-fill{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .6s cubic-bezier(.16,1,.3,1)}
+.clz-ring-wrap .clz-days{position:relative;font-variant-numeric:tabular-nums}
+/* o cartão de destaque tem fundo próprio: precisa de respiro dos lados */
+.clz-hero{padding:24px 28px;border:1px solid var(--line);border-radius:var(--radius-lg)}
+.clz-hero-actions{margin-inline:-4px}
+
+/* Agenda: compromisso curto mostra título e horário na mesma linha, sem cortar. */
+.appointment{border-left-width:2px}
+.appointment:hover{border-left:2px solid var(--accent-strong)}
+.appointment.short{display:flex;align-items:center;gap:8px;padding-block:0 1px}
+.appointment.short strong{flex:0 1 auto;min-width:0}
+.appointment.short small{flex:none}
+
+/* A dica some quando a tarefa já está escrita. */
+#task:not(:placeholder-shown)+#taskHint{display:none}
+
+/* Pomodoro minimizado: mesmo tipo de número do timer, não fonte de código. */
+#focusDock.floating.minimized #focusDockMiniClock{font:600 20px/1.2 var(--font-sans);letter-spacing:-.02em}
+
+/* Títulos recebem foco por código ao trocar de seção (para leitor de tela), sem anel visível. */
+h1[tabindex="-1"]:focus,h2[tabindex="-1"]:focus{outline:none;box-shadow:none}
+
+/* Estudos: ações da árvore aparecem ao passar o mouse ou focar; no toque ficam sempre visíveis. */
+@media (hover:hover) and (pointer:fine){
+  .tree-line{position:relative}
+  .tree-line .tree-actions{position:absolute;right:2px;top:50%;translate:0 -50%;opacity:0;pointer-events:none;
+    background:var(--surface-2);border-radius:6px;box-shadow:-10px 0 10px -4px var(--surface-2);transition:opacity .15s}
+  .tree-line:hover .tree-actions,.tree-line:focus-within .tree-actions{opacity:1;pointer-events:auto}
+}
+.tree-actions button{min-width:26px;border-radius:6px}
+@media (max-width:900px){
+  .tree-actions button{min-width:36px;min-height:36px}
+  .tree-name{padding-block:10px}
+}
+
+/* Celular: o fim da página não fica escondido atrás do Pomodoro flutuante. */
+@media (max-width:900px){
+  main,.study-page{padding-bottom:72px}
+  .clz-hero{padding:20px}
+}

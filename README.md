@@ -34,14 +34,12 @@ Depois abra http://localhost:8080. Também funciona com o Live Server do VS Code
 ## Testes
 
 ```bash
-node tests/study-core.test.cjs
-node tests/applications.test.cjs
-node tests/clareza.test.cjs
-node tests/reminders.test.cjs
-node tests/sync.test.cjs
+npm test
 ```
 
-Os testes também rodam no GitHub antes de cada publicação.
+(Ou, sem npm: `node --test "tests/*.test.cjs"`. Precisa do Node 22 ou mais novo, sem dependências.)
+
+Os testes também rodam no GitHub antes de cada publicação. Para padronizar a formatação do código: `npm run format` (usa o Prettier, baixado na hora pelo npx).
 
 ## Publicar (GitHub Pages)
 
@@ -58,7 +56,9 @@ O site fica em `https://SEU-USUARIO.github.io/stepbystep/`. No celular, abra o l
 - **Sincronização (opcional):** ⚙ → Sincronização → cole a chave e conecte. Faça o mesmo em cada aparelho. A partir daí, cada mudança sobe para o banco Postgres no Neon em poucos segundos, e os outros aparelhos puxam ao abrir, ao voltar para o app e a cada minuto. Funciona offline e sincroniza quando a internet volta.
   - O app usa um papel do banco (`stepbystep_sync`) que só pode ler, inserir e atualizar a tabela `sync_docs`. A chave é a senha desse papel: fica só nos seus aparelhos, não está no código nem no backup.
   - Conflito: se os dois aparelhos mudarem a mesma coisa (o mesmo dia, a mesma anotação) sem sincronizar, vale a última versão enviada.
-  - Para trocar a chave: no SQL Editor do Neon, `ALTER ROLE stepbystep_sync PASSWORD '...';` e conecte de novo nos aparelhos.
+  - **Cifragem (recomendado):** ⚙ → Sincronização → Cifrar dados na nuvem. A partir daí, cada documento sobe cifrado (AES-GCM) com uma chave derivada da chave de sincronização: quem abrir o banco pelo painel do Neon vê só texto embaralhado. Antes de ativar, feche e abra o app nos outros aparelhos para todos estarem na versão nova; os aparelhos atualizados passam a cifrar sozinhos ao encontrar um documento cifrado.
+  - O que chega da nuvem é conferido antes de entrar no app. Documento estragado é ignorado (aparece um aviso no console) e não apaga nada local.
+  - Para trocar a chave: no SQL Editor do Neon, `ALTER ROLE stepbystep_sync PASSWORD '...';` e conecte de novo nos aparelhos. Com a cifragem ativada, conecte **primeiro o aparelho mais atualizado**: ele recifra e reenvia tudo com a chave nova (o que estava cifrado com a chave antiga não abre mais).
 - Sem sincronização, use ⚙ → Exportar/Importar backup para levar dados entre aparelhos.
 - Limpar os dados do site no navegador apaga tudo. Faça backup de vez em quando (o app lembra depois de 7 dias).
 
@@ -66,9 +66,12 @@ O site fica em `https://SEU-USUARIO.github.io/stepbystep/`. No celular, abra o l
 
 ```
 dist/                 site publicado
-  index.html          página única
+  index.html          página única; a Content-Security-Policy no <head> só libera o próprio site,
+                      o YouTube (música) e o Neon (sincronização). Serviço externo novo? Libere lá.
   styles.css          todo o visual (tokens de cor no topo; tema claro em [data-theme=light])
-  app.js              Meu dia: plano, timer, checklist, agenda, música, histórico de dias
+  theme-init.js       aplica o tema antes de desenhar (evita piscar)
+  day-core.js         regras puras do Meu dia: dia novo, dia vazio, pendências, validação
+  app.js              Meu dia: plano, timer, checklist, agenda, música, histórico de dias; saveDB() grava tudo
   study-core.js       regras puras de estudos, revisões e backup
   studies.js          interface de Estudos, Revisões, Histórico e navegação
   applications*.js    Candidaturas
@@ -81,9 +84,9 @@ dist/                 site publicado
   notify.js           avisos do sistema e exportação para calendário
   sync-core.js        regras puras da sincronização (documentos, mudanças, conflitos)
   sync.js             sincronização com o Neon e tela de conexão
-  sw.js, manifest.webmanifest, icons/   app instalável e offline
+  sw.js, manifest.webmanifest, icons/   app instalável e offline (a versão do cache muda sozinha a cada publicação)
   fonts/              Fraunces e Manrope (OFL), servidas localmente
-tests/                testes em Node, sem dependências
+tests/                testes em Node (node:test), sem dependências
 .github/workflows/    publicação automática no GitHub Pages
 deploy.ps1 / .cmd     deploy pelo PowerShell
 STUDIES.md            documentação técnica das regras

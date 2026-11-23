@@ -139,7 +139,7 @@
 
   // ---------- Utilidades ----------
   function persist() {
-    try { localStorage.setItem(key, JSON.stringify(db)); return true; }
+    try { saveDB(); return true; }
     catch { $('saveStatus').textContent = 'Não foi possível salvar. Exporte um backup.'; return false; }
   }
   const fmtDate = iso => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });

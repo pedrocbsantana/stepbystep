@@ -6,7 +6,8 @@
 <title>stepbystep — Foco e rotina</title>
 <meta name="description" content="Seu dia, uma tarefa por vez. Organize blocos, pratique foco e acompanhe sua consistência.">
 <meta name="theme-color" content="#131615">
-<script>/* aplica o tema antes de desenhar a página, sem piscar */try{var t=localStorage.getItem('stepbystep-theme');if(t==='light'||(t==='system'&&matchMedia('(prefers-color-scheme: light)').matches))document.documentElement.dataset.theme='light'}catch(e){}</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com; font-src 'self'; connect-src 'self' https://ep-sweet-fire-beqdyjww.c-9.us-east-2.aws.neon.tech; frame-src https://www.youtube.com https://www.youtube-nocookie.com; media-src 'self' blob: data:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<script src="theme-init.js"></script>
 <link rel="stylesheet" href="styles.css">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/favicon-64.png">
@@ -210,6 +211,10 @@
     <div id="syncUnlinked" class="row"><input type="password" id="syncKey" placeholder="Chave de sincronização" autocomplete="off" aria-label="Chave de sincronização"><button type="button" class="primary" id="syncConnect">Conectar</button></div>
     <div id="syncChoice" class="row" hidden><button type="button" class="primary" id="syncUseRemote">Dados da nuvem</button><button type="button" id="syncUseLocal">Dados deste aparelho</button></div>
     <div id="syncLinked" class="row" hidden><button type="button" class="primary" id="syncNow">Sincronizar agora</button><button type="button" id="syncUnlink">Desconectar</button></div>
+    <div id="syncSealBox" hidden>
+      <p class="small" id="syncSealText">Cifrar os dados na nuvem: quem abrir o banco vê só texto embaralhado. Antes, feche e abra o app de novo nos outros aparelhos, para todos estarem na versão nova.</p>
+      <div class="row"><button type="button" id="syncSeal">Cifrar dados na nuvem</button></div>
+    </div>
   </div>
   <div class="settings-section">
     <h3>Avisos</h3>
@@ -229,6 +234,7 @@
   </div>
 </dialog>
 
+<script src="day-core.js"></script>
 <script src="app.js"></script>
 <script src="applications-core.js"></script>
 <script src="clareza-core.js"></script>

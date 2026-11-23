@@ -1,9 +1,10 @@
 /* Service worker: o app abre offline. Sempre tenta a rede primeiro (para receber
    atualizações) e usa a cópia guardada quando estiver sem internet.
    Os dados pessoais não passam por aqui: ficam no localStorage do navegador. */
-const CACHE = 'stepbystep-v9';
+// A versão é trocada sozinha a cada publicação (veja .github/workflows/pages.yml).
+const CACHE = 'stepbystep-dev';
 const ASSETS = [
-  './', 'index.html', 'styles.css', 'manifest.webmanifest',
+  './', 'index.html', 'styles.css', 'manifest.webmanifest', 'theme-init.js', 'day-core.js',
   'app.js', 'applications-core.js', 'clareza-core.js', 'study-core.js', 'studies.js',
   'applications.js', 'clareza.js', 'focus-dock.js', 'daily-journal.js', 'settings.js', 'reminders-core.js', 'notify.js', 'sync-core.js', 'sync.js',
   'fonts/manrope.woff2', 'fonts/fraunces.woff2',
@@ -18,8 +19,10 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  // no-cache: sempre confere com o servidor (barato, só baixa o que mudou), em vez de
+  // aceitar a cópia do cache HTTP do navegador, que pode ter alguns minutos de atraso.
   e.respondWith(
-    fetch(req)
+    fetch(req, { cache: 'no-cache' })
       .then(res => {
         if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
         return res;

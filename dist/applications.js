@@ -12,7 +12,7 @@
   const removeDialog=document.createElement('dialog');removeDialog.id='applicationDeleteDialog';removeDialog.className='study-dialog';removeDialog.setAttribute('aria-labelledby','applicationDeleteTitle');removeDialog.innerHTML='<h2 id="applicationDeleteTitle">Excluir candidatura?</h2><p id="applicationDeleteDescription" style="margin-top:14px"></p><div class="dialog-buttons"><button id="cancelDeleteApplication">Cancelar</button><button class="danger" id="confirmDeleteApplication">Excluir candidatura</button></div>';document.body.appendChild(removeDialog);
   const notice=document.createElement('div');notice.className='study-toast app-toast';notice.hidden=true;notice.setAttribute('role','status');document.body.appendChild(notice);let noticeTimeout;
   function toast(text){notice.textContent=text;notice.hidden=false;clearTimeout(noticeTimeout);noticeTimeout=setTimeout(()=>notice.hidden=true,4000)}
-  function persist(){try{localStorage.setItem(key,JSON.stringify(db));$('saveStatus').textContent='Salvo neste navegador.';return true}catch{toast('Falha ao salvar. Exporte um backup.');return false}}
+  function persist(){try{saveDB();$('saveStatus').textContent='Salvo neste navegador.';return true}catch{toast('Falha ao salvar. Exporte um backup.');return false}}
   function formatDate(d){return d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'Não informada'}
   function isDue(v){return A.active(v.status)&&v.followUp&&v.followUp<=C.dateKey()}
   function render(){

@@ -50,7 +50,7 @@
   }
   document.querySelectorAll('[data-section]').forEach(c=>c.onchange=()=>{
     db.prefs.sections[c.dataset.section]=c.checked;
-    try{localStorage.setItem(key,JSON.stringify(db))}catch{}
+    try{saveDB()}catch{}
     applySections();
   });
   window.applySections=applySections;

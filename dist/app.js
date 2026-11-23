@@ -2,9 +2,14 @@
 
 const $ = (id) => document.getElementById(id),
   key = "um-passo-v1",
-  localDate = (d) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  localDate = DayCore.dateKey;
 let db;
+// Única forma de gravar o estado do app. Lança erro se o navegador recusar
+// (quem chama decide o que mostrar) e avisa quem quiser saber, como a sincronização.
+function saveDB(data = db) {
+  localStorage.setItem(key, JSON.stringify(data));
+  window.dispatchEvent(new Event("stepbystep:saved"));
+}
 try {
   db = JSON.parse(localStorage.getItem(key)) || { days: {} };
 } catch {
@@ -33,42 +38,11 @@ const TRASH_DAYS = 30;
 for (const [k, v] of Object.entries(db.deletedDays || {}))
   if (!v?.deletedAt || Date.now() - v.deletedAt > TRASH_DAYS * 864e5)
     delete db.deletedDays[k];
-const defaults = () => ({
-  blocks: db.planTemplate.map(({ name, min }) => ({ name, min, done: false })),
-  task: "",
-  timerMinutes: 10,
-  rounds: 0,
-  checks: [],
-  distractions: [],
-  wentWell: "",
-  nextStep: "",
-  feeling: "",
-  reviewed: false,
-});
+const defaults = () => DayCore.newDay(db.planTemplate);
 let day;
-// Um dia só "existe" no histórico quando tem algum registro de verdade.
-function isEmptyDay(v) {
-  return (
-    !v ||
-    !(
-      v.planEdited ||
-      v.rounds > 0 ||
-      v.blocks?.some((b) => b.done) ||
-      v.checks?.length ||
-      v.distractions?.length ||
-      v.appointments?.length ||
-      v.wentWell ||
-      v.nextStep ||
-      v.feeling ||
-      v.reviewed ||
-      v.journal ||
-      v.task
-    )
-  );
-}
+const isEmptyDay = DayCore.isEmptyDay;
 function pruneEmptyDays() {
-  for (const [k, v] of Object.entries(db.days))
-    if (k !== date && isEmptyDay(v)) delete db.days[k];
+  DayCore.pruneEmptyDays(db.days, date);
 }
 // Resumo do dia no topo: blocos, foco e checklist.
 function renderSummary() {
@@ -85,7 +59,7 @@ function save() {
   pruneEmptyDays();
   renderHistory();
   try {
-    localStorage.setItem(key, JSON.stringify(db));
+    saveDB();
     $("saveStatus").textContent =
       "Salvo";
   } catch {
@@ -147,11 +121,7 @@ function load() {
 }
 // O "primeiro passo de amanhã" do último dia anterior vira sugestão para a tarefa.
 function renderSuggestion() {
-  const prev = Object.keys(db.days)
-      .filter((k) => k < date && db.days[k].nextStep?.trim())
-      .sort()
-      .pop(),
-    text = prev ? db.days[prev].nextStep.trim() : "";
+  const text = DayCore.suggestion(db.days, date);
   const show = !!text && !day.task?.trim() && !running;
   $("taskSuggestion").hidden = !show;
   if (show) {
@@ -254,21 +224,9 @@ const shortDate = (d) =>
     day: "2-digit",
     month: "2-digit",
   });
-function addDaysKey(d, n) {
-  const v = new Date(d + "T12:00:00");
-  v.setDate(v.getDate() + n);
-  return localDate(v);
-}
+const addDaysKey = DayCore.addDays;
 // Pendências: itens não feitos do último dia anterior com checklist.
-function carrySource() {
-  const prev = Object.keys(db.days)
-    .filter((k) => k < date && db.days[k].checks?.length)
-    .sort()
-    .pop();
-  if (!prev) return null;
-  const open = db.days[prev].checks.filter((c) => !c.done && !c.movedTo);
-  return open.length ? { date: prev, open } : null;
-}
+const carrySource = () => DayCore.carrySource(db.days, date);
 function renderCarry() {
   const src = carrySource();
   $("carryChecks").hidden = !src;
@@ -676,7 +634,7 @@ function renderAgenda() {
             });
           positions.forEach(({ v, column }) => {
             const duration = minuteValue(v.end) - minuteValue(v.start);
-            html += `<button class="appointment ${v.done ? "completed" : ""}" data-event="${escapeHTML(v.id)}" data-event-date="${d}" style="top:${minuteValue(v.start)}px;height:${Math.max(18, duration - 2)}px;left:calc(${(column / ends.length) * 100}% + 2px);width:calc(${100 / ends.length}% - 4px)" aria-label="Editar ${escapeHTML(v.title)}, ${v.start} às ${v.end}, ${d}"><strong>${escapeHTML(v.title)}</strong><small>${v.start}–${v.end}</small></button>`;
+            html += `<button class="appointment ${v.done ? "completed" : ""} ${duration < 45 ? "short" : ""}" data-event="${escapeHTML(v.id)}" data-event-date="${d}" style="top:${minuteValue(v.start)}px;height:${Math.max(18, duration - 2)}px;left:calc(${(column / ends.length) * 100}% + 2px);width:calc(${100 / ends.length}% - 4px)" aria-label="Editar ${escapeHTML(v.title)}, ${v.start} às ${v.end}, ${d}"><strong>${escapeHTML(v.title)}</strong><small>${v.start}–${v.end}</small></button>`;
           });
         });
         if (d === today) {
@@ -1239,7 +1197,7 @@ function flush() {
   // Salvar não é pausar: o prazo absoluto continua valendo em segundo plano.
   if (running) day.remaining = Math.max(0, Math.ceil((end - Date.now()) / 1000));
   try {
-    localStorage.setItem(key, JSON.stringify(db));
+    saveDB();
   } catch {}
 }
 window.addEventListener("beforeunload", flush);
