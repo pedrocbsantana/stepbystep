@@ -1,4 +1,4 @@
-/* Lembretes: regras puras. Junta compromissos, revisões e acompanhamentos de vagas,
+/* Lembretes: regras puras. Junta compromissos e revisões,
    gera o resumo do dia e o arquivo .ics para calendários. Sem DOM.
    A Clareza fica de fora de propósito. */
 (root => {
@@ -77,12 +77,7 @@
         out.push({ kind: 'review', uid: `review-${n.id}-${r.stage}`, date, title: `Revisão: ${n.title || 'anotação'}`, overdue: r.nextDue < today });
       }
     }
-    for (const v of db.applications || []) {
-      if (v.followUp && !['Contratado', 'Encerrada'].includes(v.status)) {
-        const date = v.followUp < today ? today : v.followUp;
-        out.push({ kind: 'followup', uid: `followup-${v.id}-${v.followUp}`, date, title: `Acompanhar: ${v.company} · ${v.role}`, notes: v.nextAction || '', overdue: v.followUp < today });
-      }
-    }
+    // Candidaturas saíram do app: seus acompanhamentos não geram mais avisos nem entram no calendário.
     return out.sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')));
   }
 

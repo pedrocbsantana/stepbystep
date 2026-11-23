@@ -20,7 +20,7 @@ Em ⚙ **Configurações**: tema, seções visíveis, avisos, exportação para 
 ## Avisos e calendário
 
 - **Avisos do sistema:** compromissos nos lembretes escolhidos (na hora, minutos, horas, dias ou semana antes; o padrão para novos compromissos fica em ⚙ → Avisos), fim do timer e um resumo do dia na primeira abertura. Funcionam com o app aberto ou aberto há pouco. No iPhone, só depois de instalar o app na tela de início (iOS 16.4+).
-- **Calendário (.ics):** ⚙ → Exportar novidades gera um arquivo com compromissos (com um alerta para cada lembrete escolhido), revisões e acompanhamentos de vagas. Importe no Google Agenda ou no Calendário do iPhone e o aviso chega mesmo com o app fechado. "Novidades" exporta só o que é novo ou mudou, para não duplicar.
+- **Calendário (.ics):** ⚙ → Exportar novidades gera um arquivo com compromissos (com um alerta para cada lembrete escolhido) e revisões. Importe no Google Agenda ou no Calendário do iPhone e o aviso chega mesmo com o app fechado. "Novidades" exporta só o que é novo ou mudou, para não duplicar.
 - A Clareza nunca entra em avisos nem no calendário.
 
 ## Rodar no computador

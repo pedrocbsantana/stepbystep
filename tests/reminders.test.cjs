@@ -23,8 +23,8 @@ const db = {
 };
 const items = R.collect(db, '2026-11-05');
 
-test('coleta compromissos, revisões e acompanhamentos', () => {
-  assert.deepEqual(items.map(v => v.uid), ['review-n1-1', 'event-a2', 'event-a1', 'followup-p1-2026-11-07']);
+test('coleta compromissos e revisões (candidaturas e Clareza ficam de fora)', () => {
+  assert.deepEqual(items.map(v => v.uid), ['review-n1-1', 'event-a2', 'event-a1']);
   assert.equal(items.find(v => v.kind === 'review').date, '2026-11-05', 'revisão atrasada aparece hoje');
   assert.ok(!JSON.stringify(items).includes('clareza'), 'Clareza nunca entra nos lembretes');
 });
@@ -48,15 +48,15 @@ test('arquivo .ics', () => {
   assert.ok(ics.includes('DTSTART:20261105T100000'));
   assert.ok(ics.includes('SUMMARY:Entrevista\\, técnica\\; 1ª fase'));
   assert.ok(ics.includes('DESCRIPTION:Link\\nsala 2'));
-  assert.ok(ics.includes('DTSTART;VALUE=DATE:20261107') && ics.includes('DTEND;VALUE=DATE:20261108'));
-  assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, 4);
+  assert.match(ics, /DTSTART;VALUE=DATE:[0-9]{8}/); // revisão: dia inteiro
+  assert.equal((ics.match(/BEGIN:VEVENT/g) || []).length, 3);
   for (const line of ics.split('\r\n')) assert.ok(Buffer.byteLength(line) <= 75, 'linha dobrada: ' + line);
 });
 
 test('exportação incremental: só o que é novo ou mudou; concluído não vai', () => {
   const exported = {};
   const next = R.changed(items, exported);
-  assert.equal(next.length, 3);
+  assert.equal(next.length, 2);
   next.forEach(v => (exported[v.uid] = R.signature(v)));
   assert.equal(R.changed(items, exported).length, 0);
   const copy = JSON.parse(JSON.stringify(db));
