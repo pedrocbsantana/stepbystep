@@ -204,7 +204,7 @@ function renderLists() {
   $("checklist").innerHTML = day.checks
     .map(
       (c, i) =>
-        `<li class="${c.done ? "done" : ""} ${c.movedTo ? "moved" : ""}"><input type="checkbox" data-check="${i}" ${c.done ? "checked" : ""} ${c.movedTo ? "disabled" : ""} aria-label="Concluir ${escapeHTML(c.text)}"><span>${escapeHTML(c.text)}${c.movedTo ? ` <small>levada para ${shortDate(c.movedTo)}</small>` : ""}</span><button class="remove" data-delcheck="${i}" aria-label="Remover tarefa">×</button></li>`,
+        `<li class="${c.done ? "done" : ""} ${c.movedTo ? "moved" : ""}"><input type="checkbox" data-check="${i}" ${c.done ? "checked" : ""} ${c.movedTo ? "disabled" : ""} aria-label="Concluir ${escapeHTML(c.text)}"><span>${escapeHTML(c.text)}${c.doing && !c.done ? ' <small class="doing-tag">fazendo</small>' : ""}${c.movedTo ? ` <small>levada para ${shortDate(c.movedTo)}</small>` : ""}</span><button class="remove" data-delcheck="${i}" aria-label="Remover tarefa">×</button></li>`,
     )
     .join("");
   $("checkCount").textContent =
@@ -278,7 +278,7 @@ $("distractionForm").onsubmit = (e) => {
 };
 $("checklist").onchange = (e) => {
   if (e.target.dataset.check !== undefined) {
-    day.checks[e.target.dataset.check].done = e.target.checked;
+    DayCore.setCheckStatus(day.checks[e.target.dataset.check], e.target.checked ? "done" : "todo");
     save();
     renderLists();
   }

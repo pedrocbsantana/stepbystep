@@ -76,3 +76,32 @@ test('validação do modelo de plano', () => {
   assert.throws(() => D.validatePlan([]));
   assert.throws(() => D.validatePlan([{ name: 'x', min: 0 }]));
 });
+
+test("quadro: cartões por coluna, itens levados ficam só no destino", () => {
+  const days = {
+    "2026-11-20": { checks: [{ text: "velha", done: false, movedTo: "2026-11-23" }, { text: "feita antiga", done: true }] },
+    "2026-11-22": { checks: [{ text: "atrasada", done: false }, { text: "andando", done: false, doing: true }] },
+    "2026-11-23": { checks: [{ text: "velha", done: false, from: "2026-11-20" }, { text: "pronta", done: true }] },
+  };
+  const c = D.boardCards(days, "2026-11-23");
+  assert.deepEqual(c.todo.map((x) => x.text), ["atrasada", "velha"]);
+  assert.equal(c.todo[0].late, true);
+  assert.equal(c.todo[1].late, false);
+  assert.deepEqual(c.doing.map((x) => [x.text, x.date, x.index]), [["andando", "2026-11-22", 1]]);
+  assert.deepEqual(c.done.map((x) => x.text), ["pronta", "feita antiga"]);
+  assert.deepEqual(D.boardCards(days, "2026-12-30").done, []);
+});
+
+test("quadro: mudar status mantém done e doing coerentes", () => {
+  const c = { text: "x", done: false };
+  D.setCheckStatus(c, "doing");
+  assert.deepEqual(c, { text: "x", done: false, doing: true });
+  D.setCheckStatus(c, "done");
+  assert.deepEqual(c, { text: "x", done: true });
+  D.setCheckStatus(c, "todo");
+  assert.deepEqual(c, { text: "x", done: false });
+  assert.throws(() => D.setCheckStatus(c, "outro"));
+  assert.throws(() =>
+    D.validateDay("2026-11-23", { blocks: [], checks: [{ text: "x", doing: "sim" }], distractions: [], timerMinutes: 25 }),
+  );
+});

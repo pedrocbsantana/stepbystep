@@ -5,7 +5,7 @@
 const CACHE = 'stepbystep-dev';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest', 'theme-init.js', 'day-core.js',
-  'app.js', 'applications-core.js', 'clareza-core.js', 'study-core.js', 'studies.js',
+  'app.js', 'applications-core.js', 'clareza-core.js', 'study-core.js', 'studies.js', 'board.js',
   'applications.js', 'clareza.js', 'focus-dock.js', 'daily-journal.js', 'settings.js', 'reminders-core.js', 'notify.js', 'sync-core.js', 'sync.js',
   'fonts/manrope.woff2', 'fonts/fraunces.woff2',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png',

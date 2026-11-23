@@ -173,6 +173,7 @@
       }
       if (keys.includes('music') && typeof renderMusic === 'function') renderMusic();
       window.StudyUI?.refresh();
+      window.Board?.refresh();
       window.Applications?.refresh?.();
       window.Clareza?.refresh();
       window.applySections?.();

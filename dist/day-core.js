@@ -99,7 +99,9 @@
     for (const b of v.blocks)
       if (!b || typeof b.name !== "string" || !Number.isFinite(b.min) || b.min < 1)
         throw Error("Bloco inválido.");
-    for (const c of v.checks) if (!c || typeof c.text !== "string") throw Error("Checklist inválido.");
+    for (const c of v.checks)
+      if (!c || typeof c.text !== "string" || (c.doing !== undefined && typeof c.doing !== "boolean"))
+        throw Error("Checklist inválido.");
     if (v.distractions.some((x) => typeof x !== "string")) throw Error("Distração inválida.");
     if (v.rounds !== undefined && !Number.isFinite(v.rounds)) throw Error("Rodadas inválidas.");
     if (v.appointments !== undefined && !Array.isArray(v.appointments))
@@ -127,7 +129,37 @@
     return plan;
   }
 
+  // ---------- Quadro (espelho do checklist) ----------
+  // Cada tarefa do checklist vira um cartão. Itens levados para outro dia aparecem só no dia de destino.
+  const STATUSES = ["todo", "doing", "done"];
+  const checkStatus = (c) => (c.done ? "done" : c.doing ? "doing" : "todo");
+  function setCheckStatus(c, status) {
+    if (!STATUSES.includes(status)) throw Error("Status inválido.");
+    c.done = status === "done";
+    if (status === "doing") c.doing = true;
+    else delete c.doing;
+  }
+  // Cartões de todos os dias, por coluna. "Feito" mostra só os últimos `doneDays` dias.
+  function boardCards(days, today, doneDays = 14) {
+    const cols = { todo: [], doing: [], done: [] };
+    const limit = addDays(today, -doneDays);
+    for (const date of Object.keys(days || {}).sort())
+      (days[date].checks || []).forEach((c, index) => {
+        if (c.movedTo) return;
+        const status = checkStatus(c);
+        if (status === "done" && date < limit) return;
+        cols[status].push({ date, index, text: c.text, status, late: status !== "done" && date < today });
+      });
+    // Pendentes: mais antigos primeiro (o atrasado no topo). Feitos: mais recentes primeiro.
+    cols.done.reverse();
+    return cols;
+  }
+
   root.DayCore = {
+    STATUSES,
+    checkStatus,
+    setCheckStatus,
+    boardCards,
     dateKey,
     validDate,
     addDays,
