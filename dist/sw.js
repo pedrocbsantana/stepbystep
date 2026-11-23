@@ -39,3 +39,20 @@ self.addEventListener('notificationclick', e => {
     return open ? open.focus() : self.clients.openWindow('./');
   }));
 });
+
+// Lembretes da agenda enviados pelo servidor (Neon Function "lembretes").
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { title: e.data?.text() }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'stepbystep', {
+    body: d.body || '', tag: d.tag || undefined, renotify: !!d.tag,
+    icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', data: { url: './#agenda' },
+  }));
+});
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    const open = list.find(c => 'focus' in c);
+    return open ? open.focus() : self.clients.openWindow(e.notification.data?.url || './');
+  }));
+});

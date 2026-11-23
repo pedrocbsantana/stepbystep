@@ -75,7 +75,11 @@
       status.textContent = 'Bloqueados. Libere nas configurações do navegador.';
       enable.hidden = true;
     } else if (enabled()) {
-      status.textContent = `Ativos: compromissos (padrão: ${R.remindersOf({}, db.prefs).map(R.reminderLabel).join(', ') || 'sem aviso'} antes), fim do timer e resumo do dia.`;
+      const closed = !pushSupported ? ' Este navegador não recebe avisos com o app fechado.'
+        : !linked() ? ' Para receber com o app fechado, ligue a Sincronização.'
+        : pushState === 'ok' ? ' Chegam também com o app fechado.'
+        : pushState === 'erro' ? ' Não deu para ativar os avisos com o app fechado; tente Desativar e Ativar de novo.' : '';
+      status.textContent = `Ativos: compromissos (padrão: ${R.remindersOf({}, db.prefs).map(R.reminderLabel).join(', ') || 'sem aviso'} antes), fim do timer e resumo do dia.` + closed;
       enable.textContent = 'Desativar';
     } else {
       status.textContent = 'Desativados.';
@@ -87,18 +91,91 @@
       : 'Compromissos, revisões e acompanhamentos de vagas, com alerta.';
   }
   $('notifyEnable').onclick = async () => {
-    if (enabled()) { db.prefs.notify = false; persist(); renderStatus(); return; }
+    if (enabled()) { db.prefs.notify = false; persist(); await unsubscribePush(); renderStatus(); return; }
     const result = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
     db.prefs.notify = result === 'granted';
     persist();
     renderStatus();
-    if (result === 'granted') notify('Avisos ativos', 'Tudo certo.', 'test');
+    if (result === 'granted') {
+      notify('Avisos ativos', 'Tudo certo.', 'test');
+      await subscribePush();
+      lastJobs = '';
+      syncJobs();
+      renderStatus();
+    }
   };
   $('notifyTest').onclick = () => notify('Teste', 'Os avisos estão funcionando.', 'test');
   $('openSettings').addEventListener('click', () => {
     renderStatus();
     mountPicker($('defaultReminders'), R.remindersOf({}, db.prefs), v => { db.prefs.reminders = [...v].sort((a, b) => b - a); persist(); renderStatus(); });
   });
+
+  // ---------- Push (avisos com o app fechado) ----------
+  // O servidor (Neon Function "lembretes") lê push_jobs a cada 5 min e envia para os aparelhos
+  // de push_subs. Precisa da sincronização ligada (usa o mesmo acesso ao banco).
+  const VAPID_PUBLIC = 'BKpQa6FsDJYtnw_EXIj4Adan6PsBQGzeYAtjc3NXSjgwwVY4DAspMQMq4d3_BwGWhachXypUTCRM-mOVDJ9AsnE';
+  const pushSupported = 'serviceWorker' in navigator && 'PushManager' in window;
+  const linked = () => !!window.Sync?.status().linked;
+  const b64 = s => Uint8Array.from(atob((s + '='.repeat((4 - s.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  let pushState = '';
+
+  async function subscribePush() {
+    if (!pushSupported || !enabled() || !linked()) return false;
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(VAPID_PUBLIC) });
+      const json = sub.toJSON();
+      await Sync.query(
+        `INSERT INTO push_subs (endpoint, sub, device, active) VALUES ($1, $2::jsonb, $3, true)
+         ON CONFLICT (endpoint) DO UPDATE SET sub = excluded.sub, device = excluded.device, active = true, updated_at = now()`,
+        [json.endpoint, JSON.stringify(json), navigator.userAgent.slice(0, 120)]);
+      pushState = 'ok';
+      return true;
+    } catch (err) {
+      pushState = 'erro';
+      console.warn('[push] inscrição', err);
+      return false;
+    }
+  }
+  async function unsubscribePush() {
+    try {
+      const sub = await (await navigator.serviceWorker.ready).pushManager.getSubscription();
+      if (!sub) return;
+      if (linked()) await Sync.query('UPDATE push_subs SET active = false, updated_at = now() WHERE endpoint = $1', [sub.endpoint]).catch(() => {});
+      await sub.unsubscribe();
+    } catch {}
+    pushState = '';
+  }
+
+  // Envia a lista de lembretes futuros e desativa os que sumiram (compromisso apagado,
+  // concluído ou lembrete desmarcado). Roda depois de salvar e de sincronizar.
+  let jobsTimer = null, lastJobs = '';
+  async function syncJobs() {
+    if (!linked()) return;
+    const jobs = R.pushJobs(db, new Date());
+    const sig = JSON.stringify(jobs);
+    if (sig === lastJobs) return;
+    try {
+      await Sync.query(
+        `WITH j AS (SELECT * FROM jsonb_to_recordset($1::jsonb) AS x(id text, "fireAt" timestamptz, title text, body text, tag text)),
+         up AS (
+           INSERT INTO push_jobs (id, fire_at, title, body, tag, active)
+           SELECT id, "fireAt", title, body, tag, true FROM j
+           ON CONFLICT (id) DO UPDATE SET
+             sent_at = CASE WHEN push_jobs.fire_at <> excluded.fire_at THEN NULL ELSE push_jobs.sent_at END,
+             fire_at = excluded.fire_at, title = excluded.title, body = excluded.body, tag = excluded.tag,
+             active = true, updated_at = now()
+           RETURNING id)
+         UPDATE push_jobs SET active = false, updated_at = now()
+          WHERE active AND sent_at IS NULL AND fire_at > now() AND id NOT IN (SELECT id FROM j)`,
+        [sig]);
+      lastJobs = sig;
+    } catch (err) { console.warn('[push] lembretes', err); }
+  }
+  const scheduleJobs = () => { clearTimeout(jobsTimer); jobsTimer = setTimeout(syncJobs, 4000); };
+  window.addEventListener('stepbystep:saved', scheduleJobs);
+  window.addEventListener('stepbystep:synced', () => { scheduleJobs(); if (enabled() && pushState !== 'ok') subscribePush().then(renderStatus); });
 
   // ---------- Avisos ----------
   // Fim do timer (chamado por app.js).
@@ -156,4 +233,6 @@
   $('icsAll').onclick = () => exportICS(false);
 
   renderStatus();
+  // Ao abrir: renova a inscrição (o navegador pode trocá-la) e envia os lembretes.
+  window.addEventListener('load', () => setTimeout(() => { if (enabled()) subscribePush().then(renderStatus); syncJobs(); }, 3000));
 })();

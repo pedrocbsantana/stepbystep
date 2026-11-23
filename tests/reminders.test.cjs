@@ -106,3 +106,18 @@ test('lembretes: cada um vira um alarme no .ics', () => {
   assert.match(ics, /TRIGGER:PT0M/);
   assert.equal((ics.match(/BEGIN:VALARM/g) || []).length, 2);
 });
+
+test('push: um lembrete com hora absoluta para cada aviso futuro', () => {
+  const R = globalThis.ReminderCore;
+  const db = { prefs: {}, days: {
+    '2026-11-25': { appointments: [{ id: 'a', title: 'Dentista', start: '14:00', end: '15:00', reminders: [2880, 60] }, { id: 'b', title: 'Feito', start: '9:00', end: '10:00', done: true }] },
+    '2027-03-01': { appointments: [{ id: 'far', title: 'Longe', start: '10:00', end: '11:00' }] },
+  } };
+  const now = new Date('2026-11-23T15:00:00');
+  const jobs = R.pushJobs(db, now);
+  // 2 dias antes = 23/11 14:00, já passou; fica só o de 1 h antes. "Longe" passa de 60 dias.
+  assert.deepEqual(jobs.map((j) => j.id), ['2026-11-25|a|60']);
+  assert.equal(jobs[0].fireAt, new Date('2026-11-25T13:00:00').toISOString());
+  assert.match(jobs[0].body, /^Em 1 h · .* · 14:00–15:00$/);
+  assert.equal(jobs[0].tag, 'event-a');
+});

@@ -21,7 +21,9 @@ Em ⚙ **Configurações**: tema, seções visíveis, avisos, exportação para 
 
 - **Avisos do sistema:** compromissos nos lembretes escolhidos (na hora, minutos, horas, dias ou semana antes; o padrão para novos compromissos fica em ⚙ → Avisos), fim do timer e um resumo do dia na primeira abertura. Funcionam com o app aberto ou aberto há pouco. No iPhone, só depois de instalar o app na tela de início (iOS 16.4+).
 - **Calendário (.ics):** ⚙ → Exportar novidades gera um arquivo com compromissos (com um alerta para cada lembrete escolhido) e revisões. Importe no Google Agenda ou no Calendário do iPhone e o aviso chega mesmo com o app fechado. "Novidades" exporta só o que é novo ou mudou, para não duplicar.
-- A Clareza nunca entra em avisos nem no calendário.
+- **Com o app fechado (push):** com os avisos ativos e a Sincronização ligada, o aparelho se inscreve para receber push. O app grava a hora de cada lembrete na tabela `push_jobs` do Neon, e a função `lembretes` (pasta `push-server/`, projeto Neon "step") roda a cada 5 minutos e envia os que venceram. O aviso chega com até ~3 minutos de diferença. No iPhone, precisa do app instalado na tela de início.
+  - Os lembretes vão em texto aberto para `push_jobs` (título, dia e horário), mesmo com a cifragem ligada, porque o servidor precisa lê-los.
+  - Publicar a função: `cd push-server && npm install && neon deploy --env .env`. O `.env` (fora do git) guarda as chaves VAPID; a pública também está em `dist/notify.js`. Trocar as chaves exige que cada aparelho desative e ative os avisos de novo.
 
 ## Rodar no computador
 

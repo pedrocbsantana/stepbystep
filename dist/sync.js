@@ -144,6 +144,7 @@
       st.lastSyncAt = Date.now(); st.error = '';
       writeState();
       setStatus();
+      window.dispatchEvent(new Event('stepbystep:synced'));
     } catch (err) {
       st.error = err.message;
       writeState();
@@ -251,7 +252,7 @@
   };
   $('openSettings').addEventListener('click', () => setStatus());
 
-  window.Sync = { sync, status: () => ({ linked: !!st.key, lastSyncAt: st.lastSyncAt, error: st.error }) };
+  window.Sync = { sync, query: (q, p) => sql(q, p), status: () => ({ linked: !!st.key, lastSyncAt: st.lastSyncAt, error: st.error }) };
   setStatus();
   if (st.key) setTimeout(sync, 800);
 })();

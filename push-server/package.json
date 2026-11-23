@@ -1,0 +1,12 @@
+{
+  "name": "stepbystep-push",
+  "private": true,
+  "type": "module",
+  "description": "Envia os lembretes da agenda por push (Neon Function + gatilho agendado).",
+  "dependencies": {
+    "@neon/config": "^1.14.6",
+    "@neon/functions": "^0.11.0",
+    "pg": "^8.23.1",
+    "web-push": "^4.0.0"
+  }
+}

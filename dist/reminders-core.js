@@ -56,6 +56,32 @@
     const day = sameDay ? 'hoje' : new Date(item.date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
     return `${when} · ${day} · ${item.start}–${item.end}`;
   }
+  // Lembretes com hora marcada para o servidor de push (próximos "days" dias).
+  // A hora vem do fuso deste aparelho, já convertida para um instante absoluto (ISO/UTC).
+  function pushJobs(db, now, days = 60) {
+    const out = [], today = localKey(now), limit = new Date(now.getTime() + days * 86400000);
+    for (const [date, day] of Object.entries(db.days || {})) {
+      if (date < today) continue;
+      for (const a of day.appointments || []) {
+        if (a.done) continue;
+        const start = startOf(date, a.start);
+        if (start <= now || start > limit) continue;
+        const dayLabel = new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit' });
+        for (const min of remindersOf(a, db.prefs)) {
+          const fire = new Date(start - min * 60000);
+          if (fire <= now) continue;
+          out.push({
+            id: `${date}|${a.id}|${min}`,
+            fireAt: fire.toISOString(),
+            title: a.title,
+            body: `${min ? 'Em ' + reminderLabel(min) : 'Agora'} · ${dayLabel} · ${a.start}–${a.end}`,
+            tag: 'event-' + a.id,
+          });
+        }
+      }
+    }
+    return out;
+  }
   // Apaga marcas de avisos de dias que já passaram.
   function pruneNotified(notified, today) {
     for (const k of Object.keys(notified)) if (k.slice(0, 10) < today) delete notified[k];
@@ -148,5 +174,5 @@
     return items.filter(v => v.kind !== 'event' || !v.done).filter(v => exported[v.uid] !== signature(v));
   }
 
-  root.ReminderCore = { MAX_REMINDER, DEFAULT_REMINDERS, validReminders, remindersOf, reminderLabel, dueReminders, reminderText, pruneNotified, collect, summary, upcoming, toICS, signature, changed };
+  root.ReminderCore = { pushJobs, MAX_REMINDER, DEFAULT_REMINDERS, validReminders, remindersOf, reminderLabel, dueReminders, reminderText, pruneNotified, collect, summary, upcoming, toICS, signature, changed };
 })(typeof window === 'undefined' ? globalThis : window);
